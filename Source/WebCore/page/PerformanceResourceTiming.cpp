@@ -91,6 +91,11 @@ PerformanceResourceTiming::~PerformanceResourceTiming()
 {
 }
 
+double PerformanceResourceTiming::workerStart() const
+{
+    return 0.0;
+}
+
 double PerformanceResourceTiming::redirectStart() const
 {
     if (!m_shouldReportDetails)

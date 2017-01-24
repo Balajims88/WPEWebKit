@@ -29,11 +29,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// See: https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/NavigationTiming/Overview.html
+// https://w3c.github.io/hr-time/
+
+typedef double DOMHighResTimeStamp;
+
 [
     Conditional=WEB_TIMING,
     GenerateIsReachable=ImplScriptExecutionContext,
 ] interface Performance : EventTarget {
+
+    DOMHighResTimeStamp now();
+
+    // https://w3c.github.io/navigation-timing/
     readonly attribute PerformanceNavigation navigation;
     readonly attribute PerformanceTiming timing;
 
@@ -42,6 +49,7 @@
     PerformanceEntryList getEntriesByType(DOMString entryType);
     PerformanceEntryList getEntriesByName(DOMString name, optional DOMString entryType);
 
+    // https://w3c.github.io/resource-timing/
     void clearResourceTimings();
     void setResourceTimingBufferSize(unsigned long maxSize);
 
