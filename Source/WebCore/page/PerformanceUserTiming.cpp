@@ -85,16 +85,6 @@ UserTiming::UserTiming(Performance& performance)
 {
 }
 
-static void insertPerformanceEntry(PerformanceEntryMap& performanceEntryMap, PassRefPtr<PerformanceEntry> performanceEntry)
-{
-    RefPtr<PerformanceEntry> entry = performanceEntry;
-    PerformanceEntryMap::iterator it = performanceEntryMap.find(entry->name());
-    if (it != performanceEntryMap.end())
-        it->value.append(entry);
-    else
-        performanceEntryMap.set(entry->name(), Vector<RefPtr<PerformanceEntry>>{ entry });
-}
-
 static void clearPerformanceEntries(PerformanceEntryMap& performanceEntryMap, const String& name)
 {
     if (name.isNull()) {
