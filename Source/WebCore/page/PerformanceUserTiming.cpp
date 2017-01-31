@@ -30,9 +30,6 @@
 
 #include "ExceptionCode.h"
 #include "Performance.h"
-#include "PerformanceEntry.h"
-#include "PerformanceMark.h"
-#include "PerformanceMeasure.h"
 #include "PerformanceTiming.h"
 #include <array>
 #include <wtf/NeverDestroyed.h>
@@ -108,13 +105,15 @@ static void clearPerformanceEntries(PerformanceEntryMap& performanceEntryMap, co
     performanceEntryMap.remove(name);
 }
 
-ExceptionOr<void> UserTiming::mark(const String& markName)
+ExceptionOr<Ref<PerformanceMark>> UserTiming::mark(const String& markName)
 {
     if (restrictedMarkFunction(markName))
         return Exception { SYNTAX_ERR };
 
-    insertPerformanceEntry(m_marksMap, PerformanceMark::create(markName, m_performance.now()));
-    return { };
+    auto& performanceEntryList = m_marksMap.ensure(markName, [] { return Vector<RefPtr<PerformanceEntry>>(); }).iterator->value;
+    auto entry = PerformanceMark::create(markName, m_performance.now());
+    performanceEntryList.append(entry.copyRef());
+    return WTFMove(entry);
 }
 
 void UserTiming::clearMarks(const String& markName)
@@ -137,7 +136,7 @@ ExceptionOr<double> UserTiming::findExistingMarkStartTime(const String& markName
     return Exception { SYNTAX_ERR };
 }
 
-ExceptionOr<void> UserTiming::measure(const String& measureName, const String& startMark, const String& endMark)
+ExceptionOr<Ref<PerformanceMeasure>> UserTiming::measure(const String& measureName, const String& startMark, const String& endMark)
 {
     double startTime = 0.0;
     double endTime = 0.0;
@@ -161,8 +160,10 @@ ExceptionOr<void> UserTiming::measure(const String& measureName, const String& s
         endTime = endMarkResult.releaseReturnValue();
     }
 
-    insertPerformanceEntry(m_measuresMap, PerformanceMeasure::create(measureName, startTime, endTime));
-    return { };
+    auto& performanceEntryList = m_measuresMap.ensure(measureName, [] { return Vector<RefPtr<PerformanceEntry>>(); }).iterator->value;
+    auto entry = PerformanceMeasure::create(measureName, startTime, endTime);
+    performanceEntryList.append(entry.copyRef());
+    return WTFMove(entry);
 }
 
 void UserTiming::clearMeasures(const String& measureName)
