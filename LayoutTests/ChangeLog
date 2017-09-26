@@ -1,5 +1,14 @@
-2018-09-18  Xabier Rodriguez Calvar  <calvaris@igalia.com>
+2017-09-26  Joanmarie Diggs  <jdiggs@igalia.com>
 
+        AX: Several ARIA roles with presentational children are exposing children
+        https://bugs.webkit.org/show_bug.cgi?id=177502
+
+        Reviewed by Chris Fleizach.
+
+        * accessibility/presentational-children-expected.txt: Added.
+        * accessibility/presentational-children.html: Added.
+
+2018-09-18  Xabier Rodriguez Calvar  <calvaris@igalia.com>
         [EME][GStreamer] The current EME implementation doesn't support the waitingforkey event
         https://bugs.webkit.org/show_bug.cgi?id=185590
 
