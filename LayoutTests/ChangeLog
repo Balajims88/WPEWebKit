@@ -1,3 +1,187 @@
+2017-09-28  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        AX: [ATK] object:state-changed notifications missing for multiple ARIA attributes
+        https://bugs.webkit.org/show_bug.cgi?id=177542
+
+        Reviewed by Chris Fleizach.
+
+        * accessibility/gtk/aria-disabled-changed-notification-expected.txt: Added.
+        * accessibility/gtk/aria-disabled-changed-notification.html: Added.
+        * accessibility/gtk/aria-expanded-changed-notification-expected.txt: Added.
+        * accessibility/gtk/aria-expanded-changed-notification.html: Added.
+        * accessibility/gtk/aria-pressed-changed-notification-expected.txt: Added.
+        * accessibility/gtk/aria-pressed-changed-notification.html: Added.
+        * accessibility/gtk/aria-readonly-changed-notification-expected.txt: Added.
+        * accessibility/gtk/aria-readonly-changed-notification.html: Added.
+        * accessibility/gtk/aria-required-changed-notification-expected.txt: Added.
+        * accessibility/gtk/aria-required-changed-notification.html: Added.
+
+2017-09-28  Per Arne Vollan  <pvollan@apple.com>
+
+        Skip failing preconnect tests on Windows.
+        https://bugs.webkit.org/show_bug.cgi?id=177626
+
+        Unreviewed test gardening.
+
+        * platform/win/TestExpectations:
+
+2017-09-28  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Mark http/tests/storageAccess/request-storage-access-top-frame.html as flaky on iOS.
+        https://bugs.webkit.org/show_bug.cgi?id=177617
+
+        Unreviewed test gardening.
+
+        * platform/ios/TestExpectations:
+
+2017-09-28  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Mark imported/w3c/web-platform-tests/WebCryptoAPI/generateKey/successes_RSA-PSS.worker.html as flaky.
+        https://bugs.webkit.org/show_bug.cgi?id=177615
+
+        Unreviewed test gardening.
+
+        * platform/mac-wk2/TestExpectations:
+
+2017-09-28  Tim Horton  <timothy_horton@apple.com>
+
+        Remove constant() in favor of env()
+        https://bugs.webkit.org/show_bug.cgi?id=177581
+        <rdar://problem/34701321>
+
+        Reviewed by Dean Jackson.
+
+        * fast/css/variables/constants/invalid-constant-name-fallback-expected.html: Removed.
+        * fast/css/variables/constants/invalid-constant-name-fallback.html: Removed.
+        * fast/css/variables/constants/ios/safe-area-inset-set-expected.html: Removed.
+        * fast/css/variables/constants/ios/safe-area-inset-set.html: Removed.
+        * fast/css/variables/constants/safe-area-inset-cannot-override-expected.html: Removed.
+        * fast/css/variables/constants/safe-area-inset-cannot-override.html: Removed.
+        * fast/css/variables/constants/safe-area-inset-zero-expected.html: Removed.
+        * fast/css/variables/constants/safe-area-inset-zero.html: Removed.
+
+2017-09-28  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Unreviewed, fix a test name in TestExpectations.
+
+        * platform/mac-wk1/TestExpectations:
+
+2017-09-28  Brent Fulgham  <bfulgham@apple.com>
+
+        Add ports 6679 and 6697 (IRC SSL) to port blacklist
+        https://bugs.webkit.org/show_bug.cgi?id=177544
+        <rdar://problem/34666525>
+
+        Reviewed by Alex Christensen.
+
+        Update test and expectations for new port.
+
+        * security/block-test-expected.txt:
+        * security/block-test.html:
+        * platform/gtk/security/block-test-expected.txt:
+        * platform/mac/security/block-test-expected.txt:
+        * platform/wpe/security/block-test-expected.txt:
+
+2017-09-28  Youenn Fablet  <youenn@apple.com>
+
+        [mac-wk1] Layout test webrtc/datachannel/bufferedAmountLowThreshold tests are flaky
+        https://bugs.webkit.org/show_bug.cgi?id=177462
+
+        Reviewed by Alex Christensen.
+
+        * webrtc/datachannel/bufferedAmountLowThreshold-default.html: Filling buffer until bufferedAmount is bug enough to trigger bufferedAmountLow event.
+        * webrtc/datachannel/bufferedAmountLowThreshold-expected.txt:
+        * webrtc/datachannel/bufferedAmountLowThreshold.html: Removing test that is inherently flaky on bots that are not fast enough
+        to continue filling the webrtc data channel buffer.
+
+2017-09-28  Chris Dumez  <cdumez@apple.com>
+
+        Add support for <link rel=preconnect>
+        https://bugs.webkit.org/show_bug.cgi?id=177474
+        <rdar://problem/33141380>
+
+        Reviewed by Alex Christensen.
+
+        * fast/dom/HTMLLinkElement/preconnect-support-expected.txt: Added.
+        * fast/dom/HTMLLinkElement/preconnect-support.html: Added.
+        * http/tests/preconnect/link-rel-preconnect-http-expected.txt: Added.
+        * http/tests/preconnect/link-rel-preconnect-http.html: Added.
+        * http/tests/preconnect/link-rel-preconnect-https-expected.txt: Added.
+        * http/tests/preconnect/link-rel-preconnect-https.html: Added.
+        Add layout test coverage.
+
+        * platform/mac-elcapitan-wk2/fast/dom/HTMLLinkElement/preconnect-support-expected.txt: Added.
+        * platform/mac-wk1/TestExpectations:
+        * platform/mac-wk1/fast/dom/HTMLLinkElement/preconnect-support-expected.txt: Added.
+        * platform/mac-wk2/TestExpectations:
+        Skip or land failure expectations for platforms where the feature is disabled.
+
+2017-09-28  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Update TestExpectations for two http/tests/xmlhttprequest/response-* tests.
+
+        Unreviewed test gardening.
+
+        * platform/mac-wk1/TestExpectations:
+
+2017-09-27  Fujii Hironori  <Hironori.Fujii@sony.com>
+
+        [REGRESSION] word-spacing property is incorrectly applied
+        https://bugs.webkit.org/show_bug.cgi?id=142086
+        <rdar://problem/19985240>
+
+        Reviewed by Zalan Bujtas.
+
+        * platform/gtk/TestExpectations: Unmark
+        fast/text/word-space-between-inlines.html
+        * platform/mac/TestExpectations: Unmark
+        fast/css/word-spacing-between-blocks.html,
+        fast/css/word-spacing-between-inlines.html,
+        fast/css/word-spacing-characters.html and
+        fast/text/word-space-between-inlines.html.
+        * platform/gtk/fast/css/word-space-extra-expected.txt:
+        Rebaselined.
+        * platform/mac/fast/css/word-space-extra-expected.png: Ditto.
+        * platform/mac/fast/css/word-space-extra-expected.txt: Ditto.
+
+2017-09-27  Wenson Hsieh  <wenson_hsieh@apple.com>
+
+        Drag event DataTransfer has unexpected types "dyn.ah62d4..."
+        https://bugs.webkit.org/show_bug.cgi?id=172526
+        <rdar://problem/32396081>
+
+        Reviewed by Ryosuke Niwa.
+
+        Add new layout tests on Mac and iOS to test various cases of using DataTransfer.setData, DataTransfer.getData,
+        and DataTransfer.types for drag-and-drop (tests for Mac WK1 only) and copy-and-paste (all platforms).
+
+        * TestExpectations:
+        * editing/pasteboard/data-transfer-get-data-on-drop-custom-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-on-drop-custom.html: Added.
+        * editing/pasteboard/data-transfer-get-data-on-drop-plain-text-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-on-drop-plain-text.html: Added.
+        * editing/pasteboard/data-transfer-get-data-on-drop-rich-text-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-on-drop-rich-text.html: Added.
+        * editing/pasteboard/data-transfer-get-data-on-drop-url-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-on-drop-url.html: Added.
+        * editing/pasteboard/data-transfer-get-data-on-paste-custom-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-on-paste-custom.html: Added.
+        * editing/pasteboard/data-transfer-get-data-on-paste-plain-text-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-on-paste-plain-text.html: Added.
+        * editing/pasteboard/data-transfer-get-data-on-paste-rich-text-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-on-paste-rich-text.html: Added.
+        * platform/ios-simulator-wk1/TestExpectations:
+
+        Mark new copy and paste tests as [ Pass ], since editing/pasteboard/ is skipped by default for iOS WK1.
+
+        * platform/ios-wk1/editing/pasteboard/data-transfer-get-data-on-paste-rich-text-expected.txt: Added.
+        * platform/ios-wk2/editing/pasteboard/data-transfer-get-data-on-paste-rich-text-expected.txt: Added.
+
+        Add iOS-specific baselines. This is due to the generated HTML markup for "text/html" being slightly different
+        when pasting.
+
+        * platform/mac-wk1/TestExpectations:
+
 2017-09-27  Zalan Bujtas  <zalan@apple.com>
 
         Deferred image size change makes image-load-on-delay.html flaky.
