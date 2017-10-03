@@ -1,3 +1,463 @@
+2017-10-02  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        AX: [ATK] The value of aria-level is not exposed on non-heading roles
+        https://bugs.webkit.org/show_bug.cgi?id=177775
+
+        Reviewed by Chris Fleizach.
+
+        * accessibility/gtk/aria-level-expected.txt: Added.
+        * accessibility/gtk/aria-level.html: Added.
+
+2017-10-02  Brent Fulgham  <bfulgham@apple.com>
+
+        [Mac] Use safer decoding practices for NSKeyedUnarchiver
+        https://bugs.webkit.org/show_bug.cgi?id=175887
+        <rdar://problem/33435281>
+
+        Reviewed by Daniel Bates.
+
+        Mark two tests as flaky for now, until the relevant CFNetwork changes are available on the test systems.
+        1. webarchive/loading/cache-expired-subresource.html
+        2. webarchive/loading/test-loading-archive-subresource-null-mimetype.html
+
+        * platform/ios/TestExpectations:
+        * platform/mac/TestExpectations:
+
+2017-10-02  Andy Estes  <aestes@apple.com>
+
+        [Payment Request] Update payment-request imported tests
+        https://bugs.webkit.org/show_bug.cgi?id=177786
+
+        Reviewed by Zalan Bujtas.
+
+        * platform/mac-wk2/TestExpectations:
+
+2017-10-02  Matt Lewis  <jlewis3@apple.com>
+
+        Additional rebaselining of js/dom/global-constructors-attributes.html.
+
+        Unreviewed test gardening.
+
+        * platform/mac-sierra-wk1/js/dom/global-constructors-attributes-expected.txt: Renamed from LayoutTests/platform/mac-sierra-wk2/js/dom/global-constructors-attributes-expected.txt.
+        * platform/mac-wk1/js/dom/global-constructors-attributes-expected.txt:
+        * platform/mac-wk2/js/dom/global-constructors-attributes-expected.txt: Removed.
+
+2017-10-02  Joseph Pecoraro  <pecoraro@apple.com>
+
+        Web Inspector: Include Beacon and Ping requests in Network tab
+        https://bugs.webkit.org/show_bug.cgi?id=177641
+        <rdar://problem/33086839>
+
+        Reviewed by Chris Dumez.
+
+        * http/tests/inspector/network/beacon-type-expected.txt: Added.
+        * http/tests/inspector/network/beacon-type.html: Added.
+        * http/tests/inspector/network/ping-type-expected.txt: Added.
+        * http/tests/inspector/network/ping-type.html: Added.
+        * http/tests/inspector/network/resources/beacon.php: Added.
+        * http/tests/inspector/network/resources/ping.php: Added.
+        Test for Beacon and Ping resource loads.
+
+        * platform/mac-wk1/TestExpectations:
+        * platform/mac-wk2/TestExpectations:
+        * platform/win/TestExpectations:
+        Skip beacon tests where beacon is not supported.
+
+2017-10-02  Jiewen Tan  <jiewen_tan@apple.com>
+
+        Mark imported/w3c/web-platform-tests/WebCryptoAPI/generateKey/successes_RSA-PSS.worker.html as slow
+        https://bugs.webkit.org/show_bug.cgi?id=177615
+
+        Unreviewed test gardening.
+
+        * TestExpectations:
+        * platform/mac-wk2/TestExpectations:
+
+2017-10-02  Matt Lewis  <jlewis3@apple.com>
+
+        Rebaseline of js/dom/global-constructors-attributes-dedicated-worker.html after r222692.
+
+        Unreviewed test gardening.
+
+        * platform/mac-wk1/js/dom/global-constructors-attributes-dedicated-worker-expected.txt:
+
+2017-10-02  Zan Dobersek  <zdobersek@igalia.com>
+
+        Unreviewed WPE gardening.
+
+        * platform/wpe/TestExpectations: Unskip some more tests, and add
+        failure expectations for whatever is still failing from that subset.
+
+2017-10-02  Matt Lewis  <jlewis3@apple.com>
+
+        Rebaseline of js/dom/global-constructors-attributes.html after r222692.
+
+        Unreviewed test gardening.
+
+        * platform/mac-elcapitan-wk2/js/dom/global-constructors-attributes-expected.txt:
+        * platform/mac-sierra/js/dom/global-constructors-attributes-expected.txt:
+        * platform/mac/js/dom/global-constructors-attributes-expected.txt:
+
+2017-10-01  Sam Weinig  <sam@webkit.org>
+
+        Skip failing tests from r222692 that have different output on each run.
+
+        * TestExpectations:
+        
+            Skips imported/w3c/web-platform-tests/fetch/api/abort/general.any.html
+            and imported/w3c/web-platform-tests/fetch/api/abort/general.any.worker.html
+
+2017-10-01  Sam Weinig  <sam@webkit.org>
+
+        Add support for DOM aborting (https://dom.spec.whatwg.org/#aborting-ongoing-activities)
+        https://bugs.webkit.org/show_bug.cgi?id=177718
+
+        Reviewed by Darin Adler.
+
+        * js/dom/global-constructors-attributes-dedicated-worker-expected.txt:
+
+            Update test results.
+
+2017-09-30  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Don't reveal file URL when pasting an image
+        https://bugs.webkit.org/show_bug.cgi?id=177710
+        <rdar://problem/34757924>
+
+        Reviewed by Wenson Hsieh.
+
+        Added a regression test for pasting an image. We enable this protection only when custom data is enabled
+        to preserve the backwards compatibility.
+
+        * editing/pasteboard/paste-image-does-not-reveal-file-url-expected.txt: Added.
+        * editing/pasteboard/paste-image-does-not-reveal-file-url.html: Added.
+
+2017-09-30  Wenson Hsieh  <wenson_hsieh@apple.com>
+
+        Augment editing/pasteboard/data-transfer-get-data-non-normalized-types.html to check whitespace stripping
+        https://bugs.webkit.org/show_bug.cgi?id=177707
+
+        Reviewed by Ryosuke Niwa.
+
+        Augment an existing layout test to check that whitespace is stripped from types passed into DataTransfer's
+        getData and setData methods.
+
+        * editing/pasteboard/data-transfer-get-data-non-normalized-types-expected.txt:
+        * editing/pasteboard/data-transfer-get-data-non-normalized-types.html:
+
+2017-09-30  Wenson Hsieh  <wenson_hsieh@apple.com>
+
+        Add a layout test test that exercises setData and getData for non-normalized types
+        https://bugs.webkit.org/show_bug.cgi?id=177707
+
+        Reviewed by Darin Adler.
+
+        We have test coverage for getData and setData with non-normalized types on some of our bots where custom
+        pasteboard data is enabled by default, but this is not the case in EWS. This patch adds a copy and paste test
+        that exercises this codepath across all Cocoa platforms.
+
+        * editing/pasteboard/data-transfer-get-data-non-normalized-types-expected.txt: Added.
+        * editing/pasteboard/data-transfer-get-data-non-normalized-types.html: Added.
+        * platform/ios-simulator-wk1/TestExpectations:
+
+2017-09-30  Carlos Garcia Campos  <cgarcia@igalia.com>
+
+        Unreviewed. Upgrade webkitgtk-test-fonts to version 0.0.7.
+
+        Rebaseline tests affected by the new fonts.
+
+        * platform/gtk/css3/unicode-bidi-isolate-basic-expected.png:
+        * platform/gtk/css3/unicode-bidi-isolate-basic-expected.txt:
+        * platform/gtk/editing/selection/caret-rtl-2-expected.png:
+        * platform/gtk/editing/selection/caret-rtl-2-expected.txt:
+        * platform/gtk/editing/selection/caret-rtl-2-left-expected.png:
+        * platform/gtk/editing/selection/caret-rtl-2-left-expected.txt:
+        * platform/gtk/editing/selection/caret-rtl-expected.png:
+        * platform/gtk/editing/selection/caret-rtl-expected.txt:
+        * platform/gtk/editing/selection/caret-rtl-right-expected.png:
+        * platform/gtk/editing/selection/caret-rtl-right-expected.txt:
+        * platform/gtk/editing/selection/extend-by-word-002-expected.png:
+        * platform/gtk/editing/selection/extend-by-word-002-expected.txt:
+        * platform/gtk/editing/selection/extend-selection-bidi-expected.png:
+        * platform/gtk/editing/selection/extend-selection-bidi-expected.txt:
+        * platform/gtk/editing/selection/move-past-trailing-space-expected.png:
+        * platform/gtk/editing/selection/move-past-trailing-space-expected.txt:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-backward-br-expected.png:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-backward-br-expected.txt:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-backward-p-expected.png:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-backward-p-expected.txt:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-forward-br-expected.png:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-forward-br-expected.txt:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-forward-p-expected.png:
+        * platform/gtk/editing/selection/vertical-rl-rtl-extend-line-forward-p-expected.txt:
+        * platform/gtk/fast/borders/rtl-border-04-expected.png:
+        * platform/gtk/fast/borders/rtl-border-04-expected.txt:
+        * platform/gtk/fast/borders/rtl-border-05-expected.png:
+        * platform/gtk/fast/borders/rtl-border-05-expected.txt:
+        * platform/gtk/fast/css/rtl-ordering-expected.png:
+        * platform/gtk/fast/css/rtl-ordering-expected.txt:
+        * platform/gtk/fast/css/text-overflow-ellipsis-bidi-expected.png:
+        * platform/gtk/fast/css/text-overflow-ellipsis-bidi-expected.txt:
+        * platform/gtk/fast/css/text-overflow-ellipsis-expected.png:
+        * platform/gtk/fast/css/text-overflow-ellipsis-expected.txt:
+        * platform/gtk/fast/css/text-overflow-ellipsis-strict-expected.png:
+        * platform/gtk/fast/css/text-overflow-ellipsis-strict-expected.txt:
+        * platform/gtk/fast/css/word-space-extra-expected.png:
+        * platform/gtk/fast/css/word-space-extra-expected.txt:
+        * platform/gtk/fast/dom/34176-expected.png:
+        * platform/gtk/fast/dom/34176-expected.txt:
+        * platform/gtk/fast/dom/52776-expected.png:
+        * platform/gtk/fast/dom/52776-expected.txt:
+        * platform/gtk/fast/forms/listbox-bidi-align-expected.png:
+        * platform/gtk/fast/forms/listbox-bidi-align-expected.txt:
+        * platform/gtk/fast/forms/search-rtl-expected.png:
+        * platform/gtk/fast/forms/search-rtl-expected.txt:
+        * platform/gtk/fast/forms/select-visual-hebrew-expected.png:
+        * platform/gtk/fast/forms/select-visual-hebrew-expected.txt:
+        * platform/gtk/fast/forms/visual-hebrew-text-field-expected.png:
+        * platform/gtk/fast/forms/visual-hebrew-text-field-expected.txt:
+        * platform/gtk/fast/inline/inline-box-background-expected.png:
+        * platform/gtk/fast/inline/inline-box-background-expected.txt:
+        * platform/gtk/fast/inline/inline-box-background-long-image-expected.png:
+        * platform/gtk/fast/inline/inline-box-background-long-image-expected.txt:
+        * platform/gtk/fast/inline/inline-box-background-repeat-x-expected.png:
+        * platform/gtk/fast/inline/inline-box-background-repeat-x-expected.txt:
+        * platform/gtk/fast/inline/inline-box-background-repeat-y-expected.png:
+        * platform/gtk/fast/inline/inline-box-background-repeat-y-expected.txt:
+        * platform/gtk/fast/text/atsui-negative-spacing-features-expected.png:
+        * platform/gtk/fast/text/atsui-negative-spacing-features-expected.txt:
+        * platform/gtk/fast/text/atsui-spacing-features-expected.png:
+        * platform/gtk/fast/text/atsui-spacing-features-expected.txt:
+        * platform/gtk/fast/text/basic/006-expected.png:
+        * platform/gtk/fast/text/basic/006-expected.txt:
+        * platform/gtk/fast/text/bidi-embedding-pop-and-push-same-expected.png:
+        * platform/gtk/fast/text/bidi-embedding-pop-and-push-same-expected.txt:
+        * platform/gtk/fast/text/capitalize-boundaries-expected.png:
+        * platform/gtk/fast/text/capitalize-boundaries-expected.txt:
+        * platform/gtk/fast/text/cg-fallback-bolding-expected.png:
+        * platform/gtk/fast/text/cg-fallback-bolding-expected.txt:
+        * platform/gtk/fast/text/drawBidiText-expected.png:
+        * platform/gtk/fast/text/drawBidiText-expected.txt:
+        * platform/gtk/fast/text/hyphenate-avoid-orphaned-word-expected.txt:
+        * platform/gtk/fast/text/hyphenate-character-expected.png:
+        * platform/gtk/fast/text/hyphenate-character-expected.txt:
+        * platform/gtk/fast/text/hyphenate-first-word-expected.png:
+        * platform/gtk/fast/text/hyphenate-first-word-expected.txt:
+        * platform/gtk/fast/text/hyphenate-limit-before-after-expected.png:
+        * platform/gtk/fast/text/hyphenate-limit-before-after-expected.txt:
+        * platform/gtk/fast/text/hyphenate-limit-lines-expected.png:
+        * platform/gtk/fast/text/hyphenate-limit-lines-expected.txt:
+        * platform/gtk/fast/text/hyphens-expected.png:
+        * platform/gtk/fast/text/hyphens-expected.txt:
+        * platform/gtk/fast/text/in-rendered-text-rtl-expected.png:
+        * platform/gtk/fast/text/in-rendered-text-rtl-expected.txt:
+        * platform/gtk/fast/text/international/bidi-AN-after-L-expected.png:
+        * platform/gtk/fast/text/international/bidi-AN-after-L-expected.txt:
+        * platform/gtk/fast/text/international/bidi-L2-run-reordering-expected.png:
+        * platform/gtk/fast/text/international/bidi-L2-run-reordering-expected.txt:
+        * platform/gtk/fast/text/international/bidi-LDB-2-CSS-expected.png:
+        * platform/gtk/fast/text/international/bidi-LDB-2-CSS-expected.txt:
+        * platform/gtk/fast/text/international/bidi-LDB-2-HTML-expected.png:
+        * platform/gtk/fast/text/international/bidi-LDB-2-HTML-expected.txt:
+        * platform/gtk/fast/text/international/bidi-LDB-2-formatting-characters-expected.png:
+        * platform/gtk/fast/text/international/bidi-LDB-2-formatting-characters-expected.txt:
+        * platform/gtk/fast/text/international/bidi-explicit-embedding-expected.png:
+        * platform/gtk/fast/text/international/bidi-explicit-embedding-expected.txt:
+        * platform/gtk/fast/text/international/bidi-ignored-for-first-child-inline-expected.png:
+        * platform/gtk/fast/text/international/bidi-ignored-for-first-child-inline-expected.txt:
+        * platform/gtk/fast/text/international/bidi-innertext-expected.png:
+        * platform/gtk/fast/text/international/bidi-innertext-expected.txt:
+        * platform/gtk/fast/text/international/bidi-linebreak-001-expected.png:
+        * platform/gtk/fast/text/international/bidi-linebreak-001-expected.txt:
+        * platform/gtk/fast/text/international/bidi-linebreak-002-expected.png:
+        * platform/gtk/fast/text/international/bidi-linebreak-002-expected.txt:
+        * platform/gtk/fast/text/international/bidi-linebreak-003-expected.png:
+        * platform/gtk/fast/text/international/bidi-linebreak-003-expected.txt:
+        * platform/gtk/fast/text/international/bidi-mirror-he-ar-expected.png:
+        * platform/gtk/fast/text/international/bidi-mirror-he-ar-expected.txt:
+        * platform/gtk/fast/text/international/bidi-neutral-run-expected.png:
+        * platform/gtk/fast/text/international/bidi-neutral-run-expected.txt:
+        * platform/gtk/fast/text/international/bidi-override-expected.png:
+        * platform/gtk/fast/text/international/bidi-override-expected.txt:
+        * platform/gtk/fast/text/international/hebrew-vowels-expected.png:
+        * platform/gtk/fast/text/international/hebrew-vowels-expected.txt:
+        * platform/gtk/fast/text/international/pop-up-button-text-alignment-and-direction-expected.png:
+        * platform/gtk/fast/text/international/pop-up-button-text-alignment-and-direction-expected.txt:
+        * platform/gtk/fast/text/international/rtl-caret-expected.png:
+        * platform/gtk/fast/text/international/rtl-caret-expected.txt:
+        * platform/gtk/fast/text/international/rtl-white-space-pre-wrap-expected.png:
+        * platform/gtk/fast/text/international/rtl-white-space-pre-wrap-expected.txt:
+        * platform/gtk/fast/text/international/unicode-bidi-plaintext-in-textarea-expected.png:
+        * platform/gtk/fast/text/international/unicode-bidi-plaintext-in-textarea-expected.txt:
+        * platform/gtk/fast/text/line-breaks-expected.png:
+        * platform/gtk/fast/text/line-breaks-expected.txt:
+        * platform/gtk/fast/text/midword-break-after-breakable-char-expected.png:
+        * platform/gtk/fast/text/midword-break-after-breakable-char-expected.txt:
+        * platform/gtk/fast/text/trailing-white-space-2-expected.png:
+        * platform/gtk/fast/text/trailing-white-space-2-expected.txt:
+        * platform/gtk/fast/text/trailing-white-space-expected.png:
+        * platform/gtk/fast/text/trailing-white-space-expected.txt:
+        * platform/gtk/fast/text/vertical-rl-rtl-linebreak-expected.png:
+        * platform/gtk/fast/text/vertical-rl-rtl-linebreak-expected.txt:
+        * platform/gtk/fast/text/whitespace/026-expected.png:
+        * platform/gtk/fast/text/whitespace/026-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirLTR-anchorEnd-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirLTR-anchorEnd-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirLTR-anchorMiddle-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirLTR-anchorMiddle-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirLTR-anchorStart-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirLTR-anchorStart-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirNone-anchorEnd-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirNone-anchorEnd-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirNone-anchorMiddle-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirNone-anchorMiddle-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirNone-anchorStart-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirNone-anchorStart-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirRTL-anchorEnd-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirRTL-anchorEnd-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirRTL-anchorMiddle-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirRTL-anchorMiddle-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirRTL-anchorStart-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-dirRTL-anchorStart-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirLTR-anchorEnd-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirLTR-anchorEnd-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirLTR-anchorMiddle-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirLTR-anchorMiddle-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirLTR-anchorStart-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirLTR-anchorStart-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirRTL-anchorEnd-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirRTL-anchorEnd-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirRTL-anchorMiddle-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirRTL-anchorMiddle-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirRTL-anchorStart-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-inherited-dirRTL-anchorStart-expected.txt:
+        * platform/gtk/svg/W3C-I18N/text-anchor-no-markup-expected.png:
+        * platform/gtk/svg/W3C-I18N/text-anchor-no-markup-expected.txt:
+        * platform/gtk/svg/W3C-SVG-1.1-SE/text-intro-02-b-expected.png:
+        * platform/gtk/svg/W3C-SVG-1.1-SE/text-intro-02-b-expected.txt:
+        * platform/gtk/svg/W3C-SVG-1.1-SE/text-intro-09-b-expected.png:
+        * platform/gtk/svg/W3C-SVG-1.1-SE/text-intro-09-b-expected.txt:
+        * platform/gtk/svg/W3C-SVG-1.1/text-tselect-02-f-expected.png:
+        * platform/gtk/svg/W3C-SVG-1.1/text-tselect-02-f-expected.txt:
+        * platform/gtk/svg/custom/glyph-selection-bidi-mirror-expected.png:
+        * platform/gtk/svg/custom/glyph-selection-bidi-mirror-expected.txt:
+        * platform/gtk/svg/text/bidi-embedded-direction-expected.png:
+        * platform/gtk/svg/text/bidi-embedded-direction-expected.txt:
+        * platform/gtk/svg/text/bidi-reorder-value-lists-expected.png:
+        * platform/gtk/svg/text/bidi-reorder-value-lists-expected.txt: Added.
+        * platform/gtk/svg/text/bidi-text-anchor-direction-expected.png:
+        * platform/gtk/svg/text/bidi-text-anchor-direction-expected.txt:
+        * platform/gtk/svg/text/text-tselect-02-f-expected.png:
+        * platform/gtk/svg/text/text-tselect-02-f-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_layers-opacity-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_layers-opacity-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_position-table-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_position-table-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-cell-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-cell-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-column-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-column-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-column-group-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-column-group-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-row-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-row-expected.txt:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-row-group-expected.png:
+        * platform/gtk/tables/mozilla/marvin/backgr_simple-table-row-group-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-cell-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-cell-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-column-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-column-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-column-group-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-column-group-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-quirks-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-quirks-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-row-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-row-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-row-group-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_border-table-row-group-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_fixed-bg-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_fixed-bg-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_layers-hide-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_layers-hide-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_layers-show-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_layers-show-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-cell-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-cell-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-column-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-column-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-column-group-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-column-group-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-row-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-row-expected.txt:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-row-group-expected.png:
+        * platform/gtk/tables/mozilla_expected_failures/marvin/backgr_position-table-row-group-expected.txt:
+
+2017-09-29  Chris Dumez  <cdumez@apple.com>
+
+        http/tests/preconnect/link-rel-preconnect-https.html is flaky
+        https://bugs.webkit.org/show_bug.cgi?id=177673
+
+        Reviewed by Alex Christensen.
+
+        * http/tests/preconnect/link-rel-preconnect-https-expected.txt:
+        Rebaseline test now that it is passing.
+
+        * platform/wk2/TestExpectations:
+        Uskip test as it should no longer be flaky.
+
+2017-09-29  Chris Dumez  <cdumez@apple.com>
+
+        Unreviewed, temporarily mark http/tests/preconnect/link-rel-preconnect-https.html as flaky.
+
+        * platform/wk2/TestExpectations:
+
+2017-09-29  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Re-enable more pasteboard tests on iOS after r222595
+        https://bugs.webkit.org/show_bug.cgi?id=177637
+
+        Reviewed by Wenson Hsieh.
+
+        * platform/ios/TestExpectations:
+
+2017-09-28  Carlos Alberto Lopez Perez  <clopez@igalia.com>
+
+        [GTK] Test gardening
+        https://bugs.webkit.org/show_bug.cgi?id=177635
+
+        Unreviewed test gardening.
+
+        * platform/gtk/TestExpectations:
+
+2017-09-28  Megan Gardner  <megan_gardner@apple.com>
+
+        Clean up Long Press Selection Tests
+        https://bugs.webkit.org/show_bug.cgi?id=177636
+
+        Reviewed by Tim Horton.
+
+        Clean up tests to use better methods of finding selection locations so that 
+        tests are more robust and less likely to be affected by unrelated changes.
+
+        * fast/events/touch/ios/long-press-then-drag-down-to-change-selected-text.html:
+        * fast/events/touch/ios/long-press-then-drag-left-to-change-selected-text.html:
+        * fast/events/touch/ios/long-press-then-drag-right-to-change-selected-text.html:
+        * fast/events/touch/ios/long-press-then-drag-up-to-change-selected-text.html:
+        * fast/events/touch/ios/long-press-to-select-and-tap-to-clear-expected.txt:
+        * fast/events/touch/ios/long-press-to-select-and-tap-to-clear.html:
+        * fast/events/touch/ios/long-press-to-select-text-expected.txt:
+        * fast/events/touch/ios/long-press-to-select-text.html:
+        * fast/events/touch/ios/resources/basic-gestures.js:
+        (longPressAtPoint):
+        (tapAtPoint):
+        (touchAndDragFromPointToPoint):
+        (pressAtPoint): Deleted.
+        (dragFromPointToPoint): Deleted.
+
 2017-09-28  Joanmarie Diggs  <jdiggs@igalia.com>
 
         AX: [ATK] object:state-changed notifications missing for multiple ARIA attributes

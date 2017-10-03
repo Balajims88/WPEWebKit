@@ -1,3 +1,336 @@
+2017-10-02  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        AX: [ATK] The value of aria-level is not exposed on non-heading roles
+        https://bugs.webkit.org/show_bug.cgi?id=177775
+
+        Reviewed by Chris Fleizach.
+
+        * WebKitTestRunner/InjectedBundle/atk/AccessibilityUIElementAtk.cpp:
+        (WTR::AccessibilityUIElement::hierarchicalLevel const):
+
+2017-10-02  Geoffrey Garen  <ggaren@apple.com>
+
+        WeakPtr should have a move constructor
+        https://bugs.webkit.org/show_bug.cgi?id=177789
+
+        Reviewed by Chris Dumez.
+
+        Chris made me write an API test. It wasn't that painful.
+
+        * TestWebKitAPI/Tests/WTF/WeakPtr.cpp:
+        (TestWebKitAPI::TEST):
+
+2017-10-02  Filip Pizlo  <fpizlo@apple.com>
+
+        WSL ^ should be *
+        https://bugs.webkit.org/show_bug.cgi?id=177705
+
+        Rubber stamped by Keith Miller.
+        
+        When I first wrote the prototype, I thought it would be cool to use ^ for pointers. Nobody agrees. I've
+        gotten so much feedback to use *. This changes pointers to use *.
+
+        * WebGPUShadingLanguageRI/DereferenceExpression.js:
+        (DereferenceExpression.prototype.toString):
+        (DereferenceExpression):
+        * WebGPUShadingLanguageRI/Intrinsics.js:
+        (Intrinsics):
+        * WebGPUShadingLanguageRI/Parse.js:
+        (parseType):
+        (parsePossiblePrefix):
+        * WebGPUShadingLanguageRI/PtrType.js:
+        (PtrType.prototype.toString):
+        (PtrType):
+        * WebGPUShadingLanguageRI/StandardLibrary.js:
+        * WebGPUShadingLanguageRI/Test.js:
+        (tests.simpleDereference):
+        (tests.dereferenceStore):
+        (tests.simpleMakePtr):
+        (tests.loadNull):
+        (tests.storeNull):
+        (tests.returnNull):
+        (tests.dereferenceDefaultNull):
+        (tests.defaultInitializedNull):
+        (tests.passNullToPtrMonomorphic):
+        (tests.passNullToPtrPolymorphic):
+        (tests.passNullAndNotNull):
+        (tests.passNullAndNotNullFullPoly):
+        (tests.passNullAndNotNullFullPolyReverse):
+        (tests.chainGeneric):
+        (tests.chainStruct):
+        (tests.chainStructNewlyValid):
+        (tests.chainStructDevice):
+        (tests.paramChainStructDevice):
+        (tests.simpleProtocolExtends):
+        (tests.protocolExtendsTwo):
+        (tests.overrideSubscriptStruct):
+        (tests.overrideSubscriptStructAndDoStores):
+        (tests.overrideSubscriptStructAndUsePointers):
+        (tests.overrideSubscriptStructAndUsePointersIncorrectly):
+        (tests.makeArrayRefFromPointer):
+        (tests.nonArrayRefArrayLengthFail):
+        (tests.constexprIsNotLValuePtr):
+        (tests.genericAccessors):
+        (tests.nestedSubscriptLValueEmulationSimple):
+        (tests.nestedSubscriptLValueEmulationGeneric):
+        (tests.shaderTypes):
+        (tests.enumPtrBase):
+        (tests.mutuallyRecursiveStructWithPointersBroken):
+        (tests.mutuallyRecursiveStructWithPointers):
+        (tests.linkedList):
+        (tests.pointerToPointer):
+        (tests.pointerGetter):
+        (tests.operatorCastWithTypeVariableInferredFromReturnType):
+        (tests.loneSetterPointer):
+        (tests.anderWithNothingWrong):
+        (tests.anderWithWrongNumberOfArguments):
+        (tests.anderDoesntReturnPointer):
+        (tests.anderDoesntTakeReference):
+        (tests.anderWithArrayRef):
+        (tests.pointerIndexGetter):
+        (tests.loneIndexSetterPointer):
+        (tests.indexAnderWithNothingWrong):
+        (tests.indexAnderWithWrongNumberOfArguments):
+        (tests.indexAnderDoesntReturnPointer):
+        (tests.indexAnderDoesntTakeReference):
+        (tests.indexAnderWithArrayRef):
+        (tests.devicePtrPtr):
+        (tests.threadgroupPtrPtr):
+        (tests.constantPtrPtr):
+        (tests.pointerIndexGetterInProtocol):
+        (tests.loneIndexSetterPointerInProtocol):
+        (tests.indexAnderWithNothingWrongInProtocol):
+        (tests.indexAnderWithWrongNumberOfArgumentsInProtocol):
+        (tests.indexAnderDoesntReturnPointerInProtocol):
+        (tests.indexAnderDoesntTakeReferenceInProtocol):
+        (tests.indexAnderWithArrayRefInProtocol):
+        (tests.andReturnedArrayRef):
+
+2017-10-02  Filip Pizlo  <fpizlo@apple.com>
+
+        WSL should be fine with &foo()[i] if foo() returns a []
+        https://bugs.webkit.org/show_bug.cgi?id=177704
+
+        Reviewed by Saam Barati.
+        
+        Previously, we'd determine if a property access expression (base.field or base[index]) was an lvalue by
+        asking if its base was an lvalue. This is right in all cases except if the base is of type []. Then, the
+        property access expression is an lvalue so long as there is a setter or ander.
+        
+        This fixes the issue and adds a test.
+        
+        Also, this makes error messages in the case that something is not an lvalue a lot better. If something
+        is not an lvalue because we could not find anders or setters, then we will tell you why we could not
+        find them.
+
+        * WebGPUShadingLanguageRI/Checker.js:
+        (Checker.prototype.visitAssignment):
+        (Checker.prototype.visitReadModifyWriteExpression):
+        (Checker.prototype.visitMakePtrExpression):
+        (Checker.prototype._finishVisitingPropertyAccess):
+        * WebGPUShadingLanguageRI/DotExpression.js:
+        (DotExpression.prototype.get fieldName):
+        (DotExpression.prototype.get isLValue): Deleted.
+        (DotExpression.prototype.get addressSpace): Deleted.
+        * WebGPUShadingLanguageRI/IndexExpression.js:
+        (IndexExpression.prototype.get index):
+        (IndexExpression.prototype.get isLValue): Deleted.
+        (IndexExpression.prototype.get addressSpace): Deleted.
+        * WebGPUShadingLanguageRI/PropertyAccessExpression.js:
+        (PropertyAccessExpression):
+        (PropertyAccessExpression.prototype.get isLValue):
+        (PropertyAccessExpression.prototype.set isLValue):
+        * WebGPUShadingLanguageRI/PropertyResolver.js:
+        (PropertyResolver.prototype._visitRValuesWithinLValue.RValueFinder.prototype.visitMakeArrayRefExpression):
+        (PropertyResolver.prototype._visitRValuesWithinLValue.RValueFinder):
+        (PropertyResolver.prototype._visitRValuesWithinLValue):
+        * WebGPUShadingLanguageRI/Test.js:
+        (tests.storeNullArrayRef):
+        (tests.andReturnedArrayRef):
+
+2017-10-02  Wenson Hsieh  <wenson_hsieh@apple.com>
+
+        Guard iOS webkitGetAsEntry API tests on older iOS versions
+
+        Unreviewed test gardening. After r222688, these tests require custom pasteboard data to be enabled by default,
+        so don't run them against shipping iOS.
+
+        * TestWebKitAPI/Tests/ios/DataInteractionTests.mm:
+
+2017-10-02  Carlos Garcia Campos  <cgarcia@igalia.com>
+
+        [WPE][GTK] Crash in webkit_web_resource_get_data_finish()
+        https://bugs.webkit.org/show_bug.cgi?id=177107
+
+        Reviewed by Michael Catanzaro.
+
+        Add a test case to check we handle errors when webkit_web_resource_get_data() fails.
+
+        * TestWebKitAPI/Tests/WebKitGLib/TestResources.cpp:
+        (webViewloadChanged):
+        (testWebResourceGetDataError):
+        (beforeAll):
+
+2017-10-02  Alex Christensen  <achristensen@webkit.org>
+
+        Fix build after r222715
+        https://bugs.webkit.org/show_bug.cgi?id=177697
+
+        * TestWebKitAPI/Tests/WebKitCocoa/UIDelegate.mm:
+        (TEST):
+        Use the public API instead of the removed SPI.
+
+2017-10-02  Alex Christensen  <achristensen@webkit.org>
+
+        REGRESSION(r214201): WebProcess hangs during policy decisions
+        https://bugs.webkit.org/show_bug.cgi?id=177590
+        <rdar://problem/33362929>
+
+        Reviewed by Andy Estes.
+
+        * TestWebKitAPI/TestWebKitAPI.xcodeproj/project.pbxproj:
+        * TestWebKitAPI/Tests/WebKitCocoa/JavaScriptDuringNavigation.mm: Added.
+        (-[JSNavigationDelegate webView:didFinishNavigation:]):
+        (-[JSNavigationDelegate webView:decidePolicyForNavigationAction:decisionHandler:]):
+        (-[JSNavigationDelegate webView:decidePolicyForNavigationResponse:decisionHandler:]):
+        (-[JSNavigationDelegate webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:]):
+        (TEST):
+
+2017-10-02  Jonathan Bedard  <jbedard@apple.com>
+
+        Log stack-trace for run-webkit-tests when interrupted
+        https://bugs.webkit.org/show_bug.cgi?id=176393
+        <rdar://problem/34262310>
+
+        Reviewed by Darin Adler.
+
+        When run-webkit-tests is stuck, it is difficult to immediately tell
+        why. Saving a stack-trace when run-webkit-tests is terminated
+        or stopped with CNTRL-C will make such issues easier to debug.
+
+        * Scripts/webkitpy/common/interupt_debugging.py: Added.
+        (log_stack_trace): Given a Python frame object, log a stack trace to
+        the provided file.
+        (log_stack_trace_on_term): Attach a listener to SIGTERM so that a
+        stack-trace can be logged when a program is terminated.
+        (log_stack_trace_on_cntrl_c): Attach a listener to SIGINT so that a
+        stack-trace can be logged when a program is CNTRL-Ced. 
+        * Scripts/webkitpy/layout_tests/run_webkit_tests.py:
+        (main): Set handlers to log stack trace on interruption.
+
+2017-10-02  Michael Catanzaro  <mcatanzaro@igalia.com>
+
+        Remove ENABLE_CSS_REGIONS
+        https://bugs.webkit.org/show_bug.cgi?id=177689
+
+        Reviewed by Darin Adler.
+
+        * Scripts/webkitperl/FeatureList.pm:
+
+2017-09-30  Carlos Garcia Campos  <cgarcia@igalia.com>
+
+        Unreviewed. Upgrade webkitgtk-test-fonts to version 0.0.7.
+
+        This version upgrades liberation fonts to version 2, that has a wider glyph coverage.
+
+        * gtk/jhbuild.modules:
+
+2017-09-29  Alex Christensen  <achristensen@webkit.org>
+
+        Expose WebPreferences::webGLEnabled through WKPreferences
+        https://bugs.webkit.org/show_bug.cgi?id=177692
+        <rdar://problem/24110556>
+
+        Reviewed by Andy Estes.
+
+        * TestWebKitAPI/Tests/WebKitCocoa/Preferences.mm:
+        (-[AlertSaver alert]):
+        (-[AlertSaver webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:]):
+        (TEST):
+
+2017-09-29  Alex Christensen  <achristensen@webkit.org>
+
+        Fix WKWebViewConfigurationPrivate after r222663
+        https://bugs.webkit.org/show_bug.cgi?id=177644
+
+        * TestWebKitAPI/TestWebKitAPI.xcodeproj/project.pbxproj:
+        * TestWebKitAPI/Tests/WebKitCocoa/Configuration.mm: Added.
+        (TEST):
+
+2017-09-28  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Image pasting is not working on tineye.com / gmail.com / GitHub.com due to lack of support for DataTransfer.items
+        https://bugs.webkit.org/show_bug.cgi?id=170449
+        <rdar://problem/31432525>
+
+        Reviewed by Wenson Hsieh.
+
+        Added an API test to paste an image from pasteboard. The test is shared between iOS and macOS.
+
+        The tests to paste image files are only enabled on macOS since putting files into pasteboard isn't a thing on iOS.
+
+        * TestWebKitAPI/TestWebKitAPI.xcodeproj/project.pbxproj:
+        * TestWebKitAPI/Tests/WebKitCocoa/PasteImage.mm: Added.
+        (writeImageDataToPasteboard):
+        (writeBundleFileToPasteboard):
+        * TestWebKitAPI/Tests/WebKitCocoa/paste-image.html: Added.
+        * TestWebKitAPI/Tests/WebKitCocoa/sunset-in-cupertino-100px.tiff: Added.
+        * TestWebKitAPI/Tests/WebKitCocoa/sunset-in-cupertino-200px.png: Added.
+        * TestWebKitAPI/Tests/WebKitCocoa/sunset-in-cupertino-400px.gif: Added.
+        * TestWebKitAPI/Tests/WebKitCocoa/sunset-in-cupertino-600px.jpg: Added.
+        * TestWebKitAPI/Tests/ios/DataInteractionTests.mm: Rebaselined the test now that types contain "Files".
+
+2017-09-29  Wenson Hsieh  <wenson_hsieh@apple.com>
+
+        [iOS WK2] Implement -[WKContentView hasText] for compatibility with the UITextInput protocol
+        https://bugs.webkit.org/show_bug.cgi?id=177662
+        <rdar://problem/33410373>
+
+        Reviewed by Tim Horton.
+
+        Add EditorState API tests to check that the value of -[WKContentView hasText] is correct when editing both plain
+        and rich text areas.
+
+        * TestWebKitAPI/EditingTestHarness.h:
+        * TestWebKitAPI/EditingTestHarness.mm:
+        (-[EditingTestHarness insertParagraph]):
+        (-[EditingTestHarness insertText:]):
+        (-[EditingTestHarness insertHTML:]):
+        (-[EditingTestHarness selectAll]):
+        (-[EditingTestHarness deleteBackwards]):
+        * TestWebKitAPI/Tests/WebKitCocoa/EditorStateTests.mm:
+
+        Add versions of EditingTestHarness helpers that don't require us to expect any editor state after executing the
+        edit command.
+
+        (TestWebKitAPI::checkContentViewHasTextWithFailureDescription):
+        (TestWebKitAPI::TEST):
+        * TestWebKitAPI/cocoa/TestWKWebView.h:
+        * TestWebKitAPI/cocoa/TestWKWebView.mm:
+        (-[TestWKWebView textInputContentView]):
+
+2017-09-29  Charles Turner  <cturner@igalia.com>
+
+        Update my status.
+
+        Unreviewed.
+
+        * Scripts/webkitpy/common/config/contributors.json:
+
+2017-09-28  Commit Queue  <commit-queue@webkit.org>
+
+        Unreviewed, rolling out r222639.
+        https://bugs.webkit.org/show_bug.cgi?id=177630
+
+        Breaks AppleWin build (Requested by dolmstead on #webkit).
+
+        Reverted changeset:
+
+        "[WinCairo][MiniBrowser] Add ca-bundle to display secure
+        pages."
+        https://bugs.webkit.org/show_bug.cgi?id=168486
+        http://trac.webkit.org/changeset/222639
+
 2017-09-28  Joanmarie Diggs  <jdiggs@igalia.com>
 
         AX: [ATK] object:state-changed notifications missing for multiple ARIA attributes
