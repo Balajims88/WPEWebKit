@@ -1,3 +1,201 @@
+2017-10-03  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        AX: [ATK] aria-rowindex set on row element is not being exposed
+        https://bugs.webkit.org/show_bug.cgi?id=177821
+
+        Reviewed by Chris Fleizach.
+
+        * accessibility/gtk/aria-rowindex-on-row-expected.txt: Added.
+        * accessibility/gtk/aria-rowindex-on-row.html: Added.
+
+2017-10-03  Ms2ger  <Ms2ger@igalia.com>
+
+        Remove some duplicate w3c tests for media tracks.
+        https://bugs.webkit.org/show_bug.cgi?id=177819
+
+        Reviewed by Youenn Fablet.
+
+        All these tests also exist in
+        imported/w3c/web-platform-tests/html/semantics/embedded-content/media-elements/interfaces,
+        where they are kept up-to-date with upstream.
+
+        * media/track/w3c/interfaces/HTMLMediaElement/addTextTrack-expected.txt: Removed.
+        * media/track/w3c/interfaces/HTMLMediaElement/addTextTrack.html: Removed.
+        * media/track/w3c/interfaces/HTMLMediaElement/textTracks-expected.txt: Removed.
+        * media/track/w3c/interfaces/HTMLMediaElement/textTracks.html: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/default-expected.txt: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/default.html: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/label-expected.txt: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/label.html: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/readyState-expected.txt: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/readyState.html: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/srclang-expected.txt: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/srclang.html: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/track-expected.txt: Removed.
+        * media/track/w3c/interfaces/HTMLTrackElement/track.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/addCue-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/addCue.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/constants-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/constants.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/kind-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/kind.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/label-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/label.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/language-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/language.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/mode-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/mode.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/oncuechange-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/oncuechange.html: Removed.
+        * media/track/w3c/interfaces/TextTrack/removeCue-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrack/removeCue.html: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/endTime-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/endTime.html: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/id-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/id.html: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/pauseOnExit-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/pauseOnExit.html: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/startTime-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/startTime.html: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/track-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackCue/track.html: Removed.
+        * media/track/w3c/interfaces/TextTrackCueList/getCueById-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackCueList/getCueById.html: Removed.
+        * media/track/w3c/interfaces/TextTrackCueList/length-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackCueList/length.html: Removed.
+        * media/track/w3c/interfaces/TextTrackList/length-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackList/length.html: Removed.
+        * media/track/w3c/interfaces/TextTrackList/onaddtrack-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackList/onaddtrack.html: Removed.
+        * media/track/w3c/interfaces/TextTrackList/onremovetrack-expected.txt: Removed.
+        * media/track/w3c/interfaces/TextTrackList/onremovetrack.html: Removed.
+        * platform/ios/TestExpectations: Removed references to removed tests.
+        * platform/mac/TestExpectations: Removed references to removed tests.
+
+2017-10-03  Daniel Bates  <dabates@apple.com>
+
+        XMLHttpRequest.setRequestHeader() should allow Content-Transfer-Encoding header; remove
+        duplicate logic to check for a forbidden XHR header field
+        https://bugs.webkit.org/show_bug.cgi?id=177829
+        <rdar://problem/34798441>
+
+        Update tests and expected results now that we match the XHR standard, <https://xhr.spec.whatwg.org> (09/08/2017).
+
+        We no longer consider Content-Transfer-Encoding and User-Agent forbidden headers as per
+        the standard.
+
+        * fast/xmlhttprequest/set-dangerous-headers-expected.txt:
+        * fast/xmlhttprequest/set-dangerous-headers-in-dashboard.html:
+        * fast/xmlhttprequest/set-dangerous-headers.html:
+        * http/tests/xmlhttprequest/check-combining-headers-expected.txt:
+        * http/tests/xmlhttprequest/set-dangerous-headers-expected.txt:
+        * http/tests/xmlhttprequest/set-dangerous-headers.html:
+
+2017-10-03  Megan Gardner  <megan_gardner@apple.com>
+
+        Add long press and drag test
+        https://bugs.webkit.org/show_bug.cgi?id=177289
+
+        Reviewed by Wenson Hsieh.
+
+        Adding a test to test the long press and then drag functionality of selection.
+        Also add additional helper functions to basic gestures, so that this and other
+        tests can be written. Mostly deals with not lifting between gestures.
+
+        * fast/events/touch/ios/long-press-then-drag-to-select-text-expected.txt: Added.
+        * fast/events/touch/ios/long-press-then-drag-to-select-text.html: Added.
+        * fast/events/touch/ios/resources/basic-gestures.js:
+        (longPressAndHoldAtPoint):
+        (touchAndDragFromPointToPoint):
+
+2017-10-03  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Skip imported/w3c/web-platform-tests/payment-request/rejects_if_not_active.https.html on iOS.
+        https://bugs.webkit.org/show_bug.cgi?id=177832
+
+        Unreviewed test gardening.
+
+        * platform/ios-wk2/TestExpectations:
+
+2017-10-03  Joseph Pecoraro  <pecoraro@apple.com>
+
+        Layout Test http/tests/inspector/network/beacon-type.html is flaky.
+        https://bugs.webkit.org/show_bug.cgi?id=177834
+
+        Unreviewed test gardening.
+
+        * http/tests/inspector/network/beacon-type.html:
+        * http/tests/inspector/network/ping-type.html:
+        Don't wait for the resource to finish loading if it has already finished loading.
+        Logs showed the resource had already finished loading earlier, before this
+        promise microtask started running.
+
+2017-10-03  Daniel Bates  <dabates@apple.com>
+
+        XMLHttpRequest.setRequestHeader() should allow Content-Transfer-Encoding header; remove
+        duplicate logic to check for a forbidden XHR header field
+        https://bugs.webkit.org/show_bug.cgi?id=177829
+
+        Reviewed by Alexey Proskuryakov.
+
+        Update tests and test results now that we no longer consider Content-Transfer-Encoding a
+        forbidden header.
+
+        * fast/xmlhttprequest/set-dangerous-headers-expected.txt:
+        * fast/xmlhttprequest/set-dangerous-headers-in-dashboard.html:
+        * fast/xmlhttprequest/set-dangerous-headers.html:
+        * http/tests/xmlhttprequest/set-dangerous-headers-expected.txt:
+        * http/tests/xmlhttprequest/set-dangerous-headers.html:
+
+2017-10-03  Joseph Pecoraro  <pecoraro@apple.com>
+
+        Unreviewed test gardening. Add debugging to flakey test.
+
+        * http/tests/inspector/network/beacon-type.html:
+        Add some debugging to try and understand why this test times out.
+
+2017-10-03  Adrian Perez de Castro  <aperez@igalia.com>
+
+        [GTK] Support the "system" CSS font family
+        https://bugs.webkit.org/show_bug.cgi?id=177755
+
+        Reviewed by Carlos Garcia Campos.
+
+        Obtain the system UI font from the GtkSettings::gtk-font-name property
+
+        * platform/gtk/fonts/systemFont-expected.html: Added.
+        * platform/gtk/fonts/systemFont.html: Added.
+
+2017-10-03  Daniel Bates  <dabates@apple.com>
+
+        [XHR] Only exempt Dashboard widgets from XHR header restrictions
+        https://bugs.webkit.org/show_bug.cgi?id=177824
+        <rdar://problem/34384301>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Add tests to ensure that file URLs are forbidden from setting the same set of blacklisted
+        headers as non-file URLs except when running in Dashboard compatibility mode.
+
+        * TestExpectations: Mark test fast/xmlhttprequest/set-dangerous-headers-in-dashboard.html
+        as WontFix on all platforms. We will selectively enable this test on Mac because it is the
+        only platform that supports Dashboard widgets.
+        * fast/xmlhttprequest/set-dangerous-headers-expected.txt: Added.
+        * fast/xmlhttprequest/set-dangerous-headers-in-dashboard-expected.txt: Added.
+        * fast/xmlhttprequest/set-dangerous-headers-in-dashboard.html: Added.
+        * fast/xmlhttprequest/set-dangerous-headers.html: Added. Derived from LayoutTests/http/tests/xmlhttprequest/set-dangerous-headers.html.
+        * platform/mac/TestExpectations: Enable test fast/xmlhttprequest/set-dangerous-headers-in-dashboard.html
+        on Mac.
+
+2017-10-03  Fujii Hironori  <Hironori.Fujii@sony.com>
+
+        REGRESSION(r221909): Failing fast/text/international/iso-8859-8.html
+        https://bugs.webkit.org/show_bug.cgi?id=177364
+
+        Reviewed by Carlos Garcia Campos.
+
+        * platform/gtk/TestExpectations: Unmark fast/text/international/iso-8859-8.html.
+
 2017-10-03  Zalan Bujtas  <zalan@apple.com>
 
         [AX] Do not trigger redundant layout on tables.
