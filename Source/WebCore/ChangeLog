@@ -1,3 +1,543 @@
+2017-10-04  Nan Wang  <n_wang@apple.com>
+
+        AX: Make video objects accessible on iOS
+        https://bugs.webkit.org/show_bug.cgi?id=177788
+        <rdar://problem/34778028>
+
+        Reviewed by Chris Fleizach.
+
+        Exposed certain <video> elements on iOS:
+        1. If they have no controls attribute set and have playsinline attribute set, that means
+           normally there are custom controls provided. 
+        2. Without autoplay attribute set. From iOS 10, with the motivation to improve performace by 
+           replacing GIF with <video>, elements will now honor the autoplay attribute if they
+           have no audio. So normally those <video> elements are not interactive.
+
+        Also provided functions to let iOS users interact with the video elements:
+        - Play/Pause: accessibilityActivate
+        - Fast forward: accessibilityIncrement
+        - Rewind: accessibilityDecrement
+
+        Test: accessibility/ios-simulator/video-elements-ios.html
+
+        * WebCore.xcodeproj/project.pbxproj:
+        * accessibility/AXObjectCache.cpp:
+        (WebCore::createFromRenderer):
+        * accessibility/AccessibilityMediaObject.cpp: Added.
+        (WebCore::AccessibilityMediaObject::AccessibilityMediaObject):
+        (WebCore::AccessibilityMediaObject::~AccessibilityMediaObject):
+        (WebCore::AccessibilityMediaObject::create):
+        (WebCore::AccessibilityMediaObject::computeAccessibilityIsIgnored const):
+        (WebCore::AccessibilityMediaObject::mediaElement const):
+        (WebCore::AccessibilityMediaObject::stringValue const):
+        (WebCore::AccessibilityMediaObject::interactiveVideoDuration const):
+        (WebCore::AccessibilityMediaObject::mediaSeek):
+        (WebCore::AccessibilityMediaObject::toggleMute):
+        (WebCore::AccessibilityMediaObject::increment):
+        (WebCore::AccessibilityMediaObject::decrement):
+        (WebCore::AccessibilityMediaObject::press):
+        (WebCore::AccessibilityMediaObject::hasControlsAttributeSet const):
+        (WebCore::AccessibilityMediaObject::isPlaying const):
+        (WebCore::AccessibilityMediaObject::isMuted const):
+        (WebCore::AccessibilityMediaObject::isAutoplayEnabled const):
+        (WebCore::AccessibilityMediaObject::isPlayingInline const):
+        (WebCore::AccessibilityMediaObject::enterFullscreen const):
+        * accessibility/AccessibilityMediaObject.h: Added.
+        * accessibility/AccessibilityObject.cpp:
+        * accessibility/AccessibilityObject.h:
+        (WebCore::AccessibilityObject::isMediaObject const):
+        * accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:
+        (-[WebAccessibilityObjectWrapper accessibilityIsWebInteractiveVideo]):
+        (-[WebAccessibilityObjectWrapper interactiveVideoDescription]):
+        (-[WebAccessibilityObjectWrapper accessibilityIsMediaPlaying]):
+        (-[WebAccessibilityObjectWrapper accessibilityIsMediaMuted]):
+        (-[WebAccessibilityObjectWrapper accessibilityToggleMuteForMedia]):
+        (-[WebAccessibilityObjectWrapper accessibilityVideoEnterFullscreen]):
+        (-[WebAccessibilityObjectWrapper determineIsAccessibilityElement]):
+        (-[WebAccessibilityObjectWrapper stringValueShouldBeUsedInLabel]):
+        (-[WebAccessibilityObjectWrapper accessibilityLabel]):
+
+2017-10-04  Wenson Hsieh  <wenson_hsieh@apple.com>
+
+        Add basic support for the version of DataTransferItemList.add that takes a File
+        https://bugs.webkit.org/show_bug.cgi?id=177853
+        <rdar://problem/34807346>
+
+        Reviewed by Ryosuke Niwa.
+
+        Adds very basic support for DataTransferItemList.add(File). So far, a File added in this way can only be read
+        back from the same DataTransfer, during dragstart or copy. This File isn't written to the platform pasteboard
+        yet, so even dropping or pasting in the same page will not transfer the File, but this brings us closer to
+        parity with other browsers. See per-method comments for details.
+
+        Tests: editing/pasteboard/data-transfer-item-list-add-file-multiple-times.html
+               editing/pasteboard/data-transfer-item-list-add-file-on-copy.html
+               editing/pasteboard/data-transfer-item-list-add-file-on-drag.html
+
+        * dom/DataTransfer.cpp:
+        (WebCore::DataTransfer::updateFileList):
+
+        Recompute the DataTransfer's FileList. This behaves the same way as destroying the FileList altogether and
+        building it from scratch, but we avoid that approach because the FileList object needs to maintain the same DOM
+        wrapper after a File-backed item is removed.
+
+        (WebCore::DataTransfer::itemListDidAddFile):
+
+        Add the newly appended DataTransferItem's File to the DataTransfer's FileList.
+
+        (WebCore::DataTransfer::types const):
+
+        Return only the "Files" type if there are file-backed items in the DataTransfer's item list.
+
+        (WebCore::DataTransfer::updatedFilesForFileList const):
+        (WebCore::DataTransfer::files const):
+        * dom/DataTransfer.h:
+        * dom/DataTransferItem.h:
+        (WebCore::DataTransferItem::file const):
+        * dom/DataTransferItemList.cpp:
+        (WebCore::DataTransferItemList::add):
+        (WebCore::DataTransferItemList::remove):
+        (WebCore::DataTransferItemList::clear):
+
+        When removing a File, only clear from the DataTransfer's pasteboard if the removed item is not a File (otherwise,
+        clearing a File that shares the same type as some other item in the pasteboard will erroneously clear that other
+        item as well). Additionally, call out to the DataTransfer to update the FileList.
+
+        * dom/DataTransferItemList.h:
+        (WebCore::DataTransferItemList::hasItems const):
+        (WebCore::DataTransferItemList::items const):
+
+        Add helpers for directly accessing an item list's items. items() should be used in conjunction with hasItems().
+        This route is taken to (1) avoid having to copy the vector of Files, and (2) to avoid generating m_items if it
+        doesn't already exist.
+
+2017-10-04  Zalan Bujtas  <zalan@apple.com>
+
+        RenderMultiColumnFlow populate/evacuate should not disable layout state.
+        https://bugs.webkit.org/show_bug.cgi?id=177894
+        <rdar://problem/34818696>
+
+        Reviewed by Antti Koivisto.
+
+        Populate/evacuate methods are not called at layout time.
+
+        Covered by existing tests.
+
+        * rendering/RenderMultiColumnFlow.cpp:
+        (WebCore::RenderMultiColumnFlow::populate):
+        (WebCore::RenderMultiColumnFlow::evacuateAndDestroy):
+
+2017-10-04  Zalan Bujtas  <zalan@apple.com>
+
+        RenderMultiColumnFlow::m_beingEvacuated is redundant.
+        https://bugs.webkit.org/show_bug.cgi?id=177886
+        <rdar://problem/34815997>
+
+        Reviewed by Simon Fraser.
+
+        m_beingEvacuated was introduced to protect RenderMultiColumnFlow from triggering
+        remove/insert code while the column is being destroyed and the descendants are getting reparented.
+        However, 
+        1. the setMultiColumnFlow(nullptr) call already protects from triggering the remove callback
+        2. When adding the children back to their original position, we should not be able to find
+        this column as the enclosing block anymore (simply because we are moving the children as siblings
+        to the multicol renderer) 
+
+        Covered by existing tests.
+
+        * rendering/RenderMultiColumnFlow.cpp:
+        (WebCore::RenderMultiColumnFlow::RenderMultiColumnFlow):
+        (WebCore::RenderMultiColumnFlow::evacuateAndDestroy):
+        (WebCore::RenderMultiColumnFlow::fragmentedFlowDescendantInserted):
+        (WebCore::RenderMultiColumnFlow::fragmentedFlowRelativeWillBeRemoved):
+        * rendering/RenderMultiColumnFlow.h:
+
+2017-10-04  Antti Koivisto  <antti@apple.com>
+
+        Fix typo.
+
+        Unreviewed.
+
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::willBeDestroyed):
+
+2017-10-04  Daniel Bates  <dabates@apple.com>
+
+        Teach TextDecorationPainter about pseudo styles
+        https://bugs.webkit.org/show_bug.cgi?id=177882
+
+        Reviewed by Simon Fraser.
+
+        As a step towards implementing support for CSS pseudo elements ::spelling-error and ::grammar-error
+        (https://bugs.webkit.org/show_bug.cgi?id=175784) teach TextDecorationPainter about pseudo styles.
+
+        * rendering/TextDecorationPainter.cpp:
+        (WebCore::TextDecorationPainter::TextDecorationPainter): Modified to take an optional
+        pseudo style (defaults to NOPSEUDO - no pseudo style).
+        (WebCore::collectStylesForRenderer): Modified to take a pseudo style. Note that getCachedPseudoStyle()
+        is only defined on RenderText and RenderElement objects (i.e. it is not a virtual function on RenderObject).
+        So, we must explicitly type check the renderer and cast appropriately before calling it. We may want
+        to consider making it virtual in the future if we find there are more call sites that would benefit
+        from polymorphism.
+        (WebCore::TextDecorationPainter::stylesForRenderer): Modified to take an optional
+        pseudo style (defaults to NOPSEUDO - no pseudo style).
+        * rendering/TextDecorationPainter.h:
+
+2017-10-04  Antti Koivisto  <antti@apple.com>
+
+        Add assert verifying all renderers get destroyed
+        https://bugs.webkit.org/show_bug.cgi?id=177870
+
+        Reviewed by Zalan Bujtas.
+
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::willBeDestroyed):
+
+            Add assert to verify all renderers for this tree have been destroyed before the RenderView is.
+
+        * rendering/RenderView.h:
+
+2017-10-04  Daniel Bates  <dabates@apple.com>
+
+        TextDecorationPainter::m_wavyOffset should be a float
+        https://bugs.webkit.org/show_bug.cgi?id=177883
+
+        Reviewed by Simon Fraser.
+
+        In r194447 we extracted the text decoration painting code from InlineTextBox into
+        TextDecorationPainter and changed the data type of the wavy offset from float to int.
+        We use floating point numbers throughout the painting code and should store the wavy
+        offset as a float.
+
+        * rendering/TextDecorationPainter.cpp:
+        (WebCore::TextDecorationPainter::TextDecorationPainter): Use C++ uniform initializer
+        syntax to initialize member fields.
+        (WebCore::TextDecorationPainter::paintTextDecoration): Change int to float.
+        * rendering/TextDecorationPainter.h: Remove unnecessary equal initializer for m_wavyOffset
+        as this class has exactly one constructor and it always initializes it.
+
+2017-10-04  Youenn Fablet  <youenn@apple.com>
+
+        Remove OpenWebRTC backend
+        https://bugs.webkit.org/show_bug.cgi?id=177868
+
+        Reviewed by Alejandro G. Castro.
+
+        * CMakeLists.txt:
+        * DerivedSources.make:
+        * Modules/mediastream/MediaEndpointPeerConnection.cpp: Removed.
+        * Modules/mediastream/MediaEndpointPeerConnection.h: Removed.
+        * Modules/mediastream/MediaEndpointSessionDescription.cpp: Removed.
+        * Modules/mediastream/MediaEndpointSessionDescription.h: Removed.
+        * Modules/mediastream/SDPProcessor.cpp: Removed.
+        * Modules/mediastream/SDPProcessor.h: Removed.
+        * Modules/mediastream/libwebrtc/LibWebRTCMediaEndpoint.cpp:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/GStreamer.cmake:
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::buildMediaEnginesVector):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::supportsType):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamerOwr.cpp: Removed.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamerOwr.h: Removed.
+        * platform/mediastream/MediaEndpoint.cpp: Removed.
+        * platform/mediastream/MediaEndpoint.h: Removed.
+        * platform/mediastream/MediaEndpointSessionConfiguration.h: Removed.
+        * platform/mediastream/SDPProcessorScriptResource.cpp: Removed.
+        * platform/mediastream/SDPProcessorScriptResource.h: Removed.
+        * platform/mediastream/openwebrtc/MediaEndpointOwr.cpp: Removed.
+        * platform/mediastream/openwebrtc/MediaEndpointOwr.h: Removed.
+        * platform/mediastream/openwebrtc/OpenWebRTCUtilities.cpp: Removed.
+        * platform/mediastream/openwebrtc/OpenWebRTCUtilities.h: Removed.
+        * platform/mediastream/openwebrtc/RealtimeAudioSourceOwr.h: Removed.
+        * platform/mediastream/openwebrtc/RealtimeMediaSourceCenterOwr.cpp: Removed.
+        * platform/mediastream/openwebrtc/RealtimeMediaSourceCenterOwr.h: Removed.
+        * platform/mediastream/openwebrtc/RealtimeMediaSourceOwr.cpp: Removed.
+        * platform/mediastream/openwebrtc/RealtimeMediaSourceOwr.h: Removed.
+        * platform/mediastream/openwebrtc/RealtimeVideoSourceOwr.h: Removed.
+        * platform/mock/MockMediaEndpoint.cpp: Removed.
+        * platform/mock/MockMediaEndpoint.h: Removed.
+        * platform/mock/MockRealtimeMediaSource.cpp:
+        (WebCore::MockRealtimeMediaSource::MockRealtimeMediaSource):
+        * platform/mock/MockRealtimeMediaSource.h:
+        * testing/Internals.cpp:
+        (WebCore::Internals::Internals):
+        (WebCore::Internals::enableMockMediaEndpoint): Deleted.
+        * testing/Internals.h:
+
+2017-10-04  Zalan Bujtas  <zalan@apple.com>
+
+        Remove RenderTreeInternalMutationScope
+        https://bugs.webkit.org/show_bug.cgi?id=177875
+        <rdar://problem/34813088>
+
+        Reviewed by Antti Koivisto.
+
+        RenderTree mutation is in the past now. -and we've got assertions in place.
+
+        Not testable.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::layout):
+        * rendering/RenderMultiColumnFlow.cpp:
+        (WebCore::RenderMultiColumnFlow::populate):
+        (WebCore::RenderMultiColumnFlow::evacuateAndDestroy):
+        * rendering/RenderQuote.cpp:
+        (WebCore::RenderQuote::updateTextRenderer):
+        (WebCore::RenderQuote::updateRenderer):
+        * rendering/RenderView.h:
+        (WebCore::RenderTreeInternalMutationScope::RenderTreeInternalMutationScope): Deleted.
+        (WebCore::RenderTreeInternalMutationScope::~RenderTreeInternalMutationScope): Deleted.
+
+2017-10-04  Miguel Gomez  <magomez@igalia.com>
+
+        Unreviewed: fix GTK debug build after r222841.
+
+        * platform/image-decoders/webp/WEBPImageDecoder.cpp:
+        (WebCore::WEBPImageDecoder::initFrameBuffer):
+
+2017-10-04  Zalan Bujtas  <zalan@apple.com>
+
+        RenderFragmentContainerRange should not hold raw pointers.
+        https://bugs.webkit.org/show_bug.cgi?id=177854
+        <rdar://problem/34805954>
+
+        Reviewed by Antti Koivisto.
+
+        m_startFragment and m_endFragment object's lifetimes are not tied to the lifetime of
+        RenderFragmentContainerRange.
+
+        Covered by existing tests.
+
+        * rendering/RenderFragmentedFlow.cpp:
+        (WebCore::RenderFragmentedFlow::setFragmentRangeForBox):
+        * rendering/RenderFragmentedFlow.h:
+
+2017-10-04  Zalan Bujtas  <zalan@apple.com>
+
+        RenderMultiColumnSpannerPlaceholder should not hold raw pointers.
+        https://bugs.webkit.org/show_bug.cgi?id=177840
+        <rdar://problem/34800109>
+
+        Reviewed by Sam Weinig.
+
+        Though we should always have a spanner as long as there's a RenderMultiColumnSpannerPlaceholder,
+        the spanner inject/removal logic is complicated enough to protect them with WeakPtr.  
+
+        Covered by existing tests.
+
+        * rendering/RenderMultiColumnSpannerPlaceholder.cpp:
+        (WebCore::RenderMultiColumnSpannerPlaceholder::RenderMultiColumnSpannerPlaceholder):
+        * rendering/RenderMultiColumnSpannerPlaceholder.h:
+
+2017-10-04  Michael Catanzaro  <mcatanzaro@igalia.com>
+
+        [GTK] GtkUtilities.h should not be included in libs not linked to GTK
+        https://bugs.webkit.org/show_bug.cgi?id=177860
+
+        Reviewed by Carlos Garcia Campos.
+
+        * platform/FreeType.cmake:
+        * platform/gtk/GtkUtilities.cpp:
+        (WebCore::topLevelPath): Deleted.
+        (WebCore::webkitBuildDirectory): Deleted.
+        * platform/gtk/GtkUtilities.h:
+        (WebCore::wallTimeForEvent):
+        * platform/text/hyphen/HyphenationLibHyphen.cpp:
+        (WebCore::topLevelPath):
+        (WebCore::webkitBuildDirectory):
+
+2017-10-04  Carlos Garcia Campos  <cgarcia@igalia.com>
+
+        [Harfbuzz] Implement ComplexTextController on top of HarfBuzz
+        https://bugs.webkit.org/show_bug.cgi?id=167956
+
+        Reviewed by Myles C. Maxfield.
+
+        Implement ComplexTextController using HarfBuzz and remove HarfBuzzShaper.
+
+        Covered by existing tests, a rebaseline will be neeed.
+
+        * platform/FreeType.cmake:
+        * platform/graphics/ComplexTextController.cpp:
+        (WebCore::TextLayoutDeleter::operator() const): Enable TextLayout when using HarfBuzz.
+        (WebCore::FontCascade::createLayout const): Ditto.
+        (WebCore::FontCascade::width): Ditto.
+        * platform/graphics/ComplexTextController.h:
+        (WebCore::ComplexTextController::ComplexTextRun::create): Add constructor that receives an hb_buffer_t.
+        * platform/graphics/Font.cpp:
+        (WebCore::Font::variantCapsSupportsCharacterForSynthesis const): Simple implementation for non-cocoa ports.
+        * platform/graphics/FontCascade.cpp:
+        (WebCore::FontCascade::getGlyphsAndAdvancesForComplexText const): Moved from FontCascadeCocoa.mm.
+        (WebCore::FontCascade::floatWidthForComplexText const): Ditto.
+        (WebCore::FontCascade::adjustSelectionRectForComplexText const): Ditto.
+        (WebCore::FontCascade::offsetForPositionForComplexText const): Ditto.
+        * platform/graphics/cairo/FontCairoHarfbuzzNG.cpp:
+        (WebCore::FontCascade::fontForCombiningCharacterSequence const): Normalize the sequence and get the font of the
+        base character.
+        * platform/graphics/cocoa/FontCascadeCocoa.mm:
+        * platform/graphics/harfbuzz/ComplexTextControllerHarfBuzz.cpp:
+        (WebCore::harfBuzzPositionToFloat):
+        (WebCore::ComplexTextController::ComplexTextRun::ComplexTextRun):
+        (WebCore::fontFeatures):
+        (WebCore::characterScript):
+        (WebCore::scriptsAreCompatibleForCharacters):
+        (WebCore::findNextRun):
+        (WebCore::ComplexTextController::collectComplexTextRunsForCharacters):
+        * platform/graphics/harfbuzz/HarfBuzzFaceCairo.cpp:
+        (WebCore::harfBuzzGetGlyph): Check here if the character is a white space and use the space or zeroWidthSpace
+        to ensure we get a glyph.
+        * platform/graphics/harfbuzz/HarfBuzzShaper.cpp: Removed.
+        * platform/graphics/harfbuzz/HarfBuzzShaper.h: Removed.
+        * platform/graphics/harfbuzz/HbUniquePtr.h: Added.
+        (WebCore::HbPtrDeleter::operator() const):
+        (WebCore::HbPtrDeleter<hb_font_t>::operator() const):
+        (WebCore::HbPtrDeleter<hb_buffer_t>::operator() const):
+        * platform/graphics/opentype/OpenTypeMathData.h: Use HbUniquePtr.
+
+2017-10-04  Michael Catanzaro  <mcatanzaro@igalia.com>
+
+        Unreviewed, fix typo in function name scanDirectoryForDicionaries
+        https://bugs.webkit.org/show_bug.cgi?id=177866
+
+        * platform/text/hyphen/HyphenationLibHyphen.cpp:
+        (WebCore::scanDirectoryForDictionaries):
+        (WebCore::scanTestDictionariesDirectoryIfNecessary):
+        (WebCore::availableLocales):
+        (WebCore::scanDirectoryForDicionaries): Deleted.
+
+2017-10-04  Miguel Gomez  <magomez@igalia.com>
+
+        Add animation support for WebP images
+        https://bugs.webkit.org/show_bug.cgi?id=113124
+
+        Reviewed by Žan Doberšek.
+
+        Implement decoding of WebP animations.
+
+        Test: fast/images/animated-webp.html
+
+        * platform/graphics/ImageBackingStore.h:
+        (WebCore::ImageBackingStore::blendPixel):
+        * platform/image-decoders/webp/WEBPImageDecoder.cpp:
+        (WebCore::WEBPImageDecoder::WEBPImageDecoder):
+        (WebCore::WEBPImageDecoder::~WEBPImageDecoder):
+        (WebCore::WEBPImageDecoder::setData):
+        (WebCore::WEBPImageDecoder::repetitionCount const):
+        (WebCore::WEBPImageDecoder::frameBufferAtIndex):
+        (WebCore::WEBPImageDecoder::findFirstRequiredFrameToDecode):
+        (WebCore::WEBPImageDecoder::decode):
+        (WebCore::WEBPImageDecoder::decodeFrame):
+        (WebCore::WEBPImageDecoder::initFrameBuffer):
+        (WebCore::WEBPImageDecoder::applyPostProcessing):
+        (WebCore::WEBPImageDecoder::parseHeader):
+        (WebCore::WEBPImageDecoder::clearFrameBufferCache):
+        * platform/image-decoders/webp/WEBPImageDecoder.h:
+
+2017-10-04  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Use blob URL when pasting RTFD instead of overriding DocumentLoader
+        https://bugs.webkit.org/show_bug.cgi?id=177801
+        <rdar://problem/34542270>
+
+        Reviewed by Wenson Hsieh.
+
+        Before this patch, pasting RTFD resulted in images and other subresources in RTFD are being placed
+        into the document using WebKit fake URL, and DocumentLoader was overridden to return the appropriate
+        data upon resource requests. This is bad because there is no mechanism for websites to access its content.
+
+        Like r222119 and r208451, this patch fixes thie problem by using a blob URL instead of a WebKit fake URL.
+        This patch also adds a Blob::create variant which takes a SharedBuffer.
+
+        API Tests: PasteRTFD
+
+        * editing/WebCorePasteboardFileReader.cpp:
+        (WebCore::WebCorePasteboardFileReader::readBuffer):
+        * editing/cocoa/WebContentReaderCocoa.mm:
+        (WebCore::DeferredLoadingScope): Extracted out of createFragmentAndAddResources for clarity.
+        (WebCore::DeferredLoadingScope::DeferredLoadingScope):
+        (WebCore::DeferredLoadingScope::~DeferredLoadingScope):
+        (WebCore::createFragmentAndAddResources): Instead of adding resources to document loader, replace each
+        URL in the document by a blob URL.
+        (WebCore::WebContentReader::readImage):
+        * editing/markup.cpp:
+        (WebCore::replaceSubresourceURLs): Added. A helper to replace each URL in the document fragment by a blob
+        URL created for each subresource. This won't work for iframes or srcset but that's okay for now since DOM
+        constructed from RTFD doesn't use either.
+        * editing/markup.h:
+        * fileapi/Blob.cpp:
+        (WebCore::Blob::Blob): Added a variant which takes a SharedBuffer.
+        * fileapi/Blob.h:
+        (WebCore::Blob::create): Ditto.
+
+2017-10-04  Michael Catanzaro  <mcatanzaro@igalia.com>
+
+        REGRESSION(r222392): [WPE][GTK] Many forms tests are failing due to broken event timestamps
+        https://bugs.webkit.org/show_bug.cgi?id=177449
+
+        Reviewed by Chris Dumez.
+
+        * platform/gtk/GtkUtilities.cpp:
+        (WebCore::wallTimeForEvent):
+        * platform/gtk/GtkUtilities.h:
+        (WebCore::wallTimeForEvent):
+
+2017-10-04  Miguel Gomez  <magomez@igalia.com>
+
+        [GTK][WPE] Fix playback of GIFs
+        https://bugs.webkit.org/show_bug.cgi?id=176089
+
+        Reviewed by Carlos Garcia Campos.
+
+        Allow GIFImageReader to decode again already decoded frames. Thanks to this, we don't
+        need to delete the GIFImageReader when GIFImageDecoder::clearFrameBufferCache() is
+        called, and the we don't need the lock to avoid crashes in that situation.
+
+        Covered by existent tests.
+
+        * platform/image-decoders/gif/GIFImageDecoder.cpp:
+        (WebCore::GIFImageDecoder::clearFrameBufferCache):
+        (WebCore::GIFImageDecoder::decode):
+        * platform/image-decoders/gif/GIFImageDecoder.h:
+        * platform/image-decoders/gif/GIFImageReader.cpp:
+        (GIFImageReader::decode):
+
+2017-10-04  Gustavo Noronha Silva  <gustavo.noronha@collabora.co.uk>
+
+        Unreviewed build fix.
+
+        Use different enum value for the check. UP_DEVICE_LEVEL_NORMAL is only available on newer
+        upower.
+
+        * platform/glib/LowPowerModeNotifierGLib.cpp:
+        (WebCore::LowPowerModeNotifier::updateState):
+
+2017-10-03  Gustavo Noronha Silva  <gustavo.noronha@collabora.co.uk>
+
+        [GLib] Let WebCore know of low power situations
+        https://bugs.webkit.org/show_bug.cgi?id=177810
+
+        Reviewed by Carlos Garcia Campos.
+
+        WebCore can use knowledge of low power situations to throttle timers and avoid expensive
+        checks, lowering power usage. We can use upower's warning level to let WebCore know we are
+        in such a situation.
+
+        No tests as there is no way to mock upower.
+
+        * PlatformGTK.cmake: add new file.
+        * PlatformWPE.cmake: add new file.
+        * platform/LowPowerModeNotifier.cpp: use upower-glib to know about low power situations.
+        * platform/LowPowerModeNotifier.h: includes upower header as UpClient and UpDevice are not forward
+        declaration-friendly.
+        * platform/glib/LowPowerModeNotifierGLib.cpp: Added.
+        (WebCore::LowPowerModeNotifier::LowPowerModeNotifier):
+        (WebCore::LowPowerModeNotifier::updateState): update low power mode from warning-level.
+        (WebCore::LowPowerModeNotifier::warningLevelCallback): track upower's warning-level to know when
+        a low power situation occurs.
+        (WebCore::LowPowerModeNotifier::~LowPowerModeNotifier): stop tracking the warning-level signal.
+        (WebCore::LowPowerModeNotifier::isLowPowerModeEnabled const):
+
 2017-10-04  Joanmarie Diggs  <jdiggs@igalia.com>
 
         AX: [ATK] aria-pressed="mixed" should be exposed via ATK_STATE_INDETERMINATE
