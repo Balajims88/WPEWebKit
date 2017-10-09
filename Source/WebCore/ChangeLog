@@ -1,3 +1,126 @@
+2017-10-09  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        AX: [ATK] Explicitly-set aria-sort value of "none" should be exposed as an object attribute
+        https://bugs.webkit.org/show_bug.cgi?id=177955
+
+        Reviewed by Chris Fleizach.
+
+        Expose "none" as the value of aria-sort when the attribute is present and not
+        one of the other valid sort types. Also add a new AccessibilitySortDirection,
+        SortDirectionInvalid. This is currently only being used when the sort direction
+        is sought for a role which does not support this ARIA attribute, but might come
+        in handy if we want to add further sanity checks on the author-provided values.
+
+        Test: accessibility/gtk/aria-sort-values.html
+
+        * accessibility/AccessibilityObject.cpp:
+        (WebCore::AccessibilityObject::sortDirection const):
+        * accessibility/AccessibilityObject.h:
+        * accessibility/atk/WebKitAccessibleWrapperAtk.cpp:
+        (webkitAccessibleGetAttributes):
+        * accessibility/mac/WebAccessibilityObjectWrapperMac.mm:
+        (-[WebAccessibilityObjectWrapper additionalAccessibilityAttributeNames]):
+
+2017-10-09  Robin Morisset  <rmorisset@apple.com>
+
+        Make the names of the options consistent 
+        https://bugs.webkit.org/show_bug.cgi?id=177933
+
+        Reviewed by Saam Barati.
+
+        No functional change, just fixing comments.
+
+        * Modules/mediasource/MediaSource.cpp:
+        (WebCore::MediaSource::buffered const):
+        (WebCore::MediaSource::monitorSourceBuffers):
+        * Modules/webaudio/AudioBufferSourceNode.cpp:
+        (WebCore::AudioBufferSourceNode::process):
+        * bindings/scripts/generate-bindings.pl:
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::adjustRenderStyle):
+        * editing/BreakBlockquoteCommand.cpp:
+        (WebCore::BreakBlockquoteCommand::doApply):
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplaceSelectionCommand::doApply):
+        * editing/VisibleSelection.cpp:
+        (WebCore::VisibleSelection::setStartAndEndFromBaseAndExtentRespectingGranularity):
+        * editing/VisibleUnits.cpp:
+        (WebCore::closestWordBoundaryForPosition):
+        * html/parser/AtomicHTMLToken.h:
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::end):
+        * inspector/InspectorOverlayPage.js:
+        (reset):
+        * page/ViewportConfiguration.cpp:
+        (WebCore::ViewportConfiguration::layoutWidth const):
+        (WebCore::ViewportConfiguration::layoutHeight const):
+        * platform/graphics/FloatPolygon.h:
+        * platform/graphics/avfoundation/InbandTextTrackPrivateAVF.cpp:
+        (WebCore::InbandTextTrackPrivateAVF::processCueAttributes):
+        * platform/graphics/filters/FilterOperation.h:
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::texImage2D):
+        * platform/mac/WidgetMac.mm:
+        (WebCore::safeRemoveFromSuperview):
+        * rendering/RenderBlockFlow.cpp:
+        (WebCore::RenderBlockFlow::collapseMarginsWithChildInfo):
+        * rendering/RenderBlockFlow.h:
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computePositionedLogicalWidthReplaced const):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::propagateRepaintToParentWithOutlineAutoIfNeeded const):
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::disabledTextColor const):
+        * style/ClassChangeInvalidation.cpp:
+        (WebCore::Style::computeClassChange):
+        * style/StyleScope.cpp:
+        (WebCore::Style::Scope::didChangeStyleSheetEnvironment):
+        * svg/SVGAltGlyphDefElement.cpp:
+        (WebCore::SVGAltGlyphDefElement::hasValidGlyphElements const):
+
+2017-10-09  Adrian Perez de Castro  <aperez@igalia.com>
+
+        [WPE][GTK] Propagate libepoxy compiler flags obtained from pkg-config
+        https://bugs.webkit.org/show_bug.cgi?id=178081
+
+        Reviewed by Carlos Alberto Lopez Perez.
+
+        No new tests needed.
+
+        * CMakeLists.txt: Use ${LIBEPOXY_DEFINITIONS} for building WebCore.
+
+2017-10-09  Romain Bellessort  <romain.bellessort@crf.canon.fr>
+
+        [Readable Streams API] Implement canCloseOrEnqueue
+        https://bugs.webkit.org/show_bug.cgi?id=178005
+
+        Reviewed by Youenn Fablet.
+
+        Implemented readableStreamDefaultControllerCanCloseOrEnqueue [1]. This is
+        just a refactoring (based on spec) aiming at factorizing a set of tests
+        that are done at multiple places.
+
+        [1] https://streams.spec.whatwg.org/#readable-stream-default-controller-can-close-or-enqueue
+
+        No new tests (refactoring, no new behavior).
+
+        * Modules/streams/ReadableStreamDefaultController.js:
+        (enqueue): Updated.
+        (close): Updated.
+        * Modules/streams/ReadableStreamInternals.js:
+        (readableStreamDefaultControllerClose): Updated.
+        (readableStreamDefaultControllerCanCloseOrEnqueue): Added.
+
+2017-10-05  Frederic Wang  <fwang@igalia.com>
+
+        Remove WOFF2 from Source/ThirdParty.
+        https://bugs.webkit.org/show_bug.cgi?id=177862
+
+        Reviewed by Michael Catanzaro.
+
+        No new tests, already covered by existing tests.
+
+        * CMakeLists.txt: Use the system brotli/woff2 headers/libraries.
 2017-10-04  Nan Wang  <n_wang@apple.com>
 
         AX: Make video objects accessible on iOS
