@@ -340,6 +340,7 @@ void RenderInline::addChildIgnoringContinuation(RenderObject* newChild, RenderOb
 
         RenderBlock* newBox = new RenderBlockFlow(document(), WTFMove(newStyle));
         newBox->initializeStyle();
+        newBox->setIsContinuation();
         RenderBoxModelObject* oldContinuation = continuation();
         setContinuation(newBox);
 
@@ -351,12 +352,13 @@ void RenderInline::addChildIgnoringContinuation(RenderObject* newChild, RenderOb
     newChild->setNeedsLayoutAndPrefWidthsRecalc();
 }
 
-RenderPtr<RenderInline> RenderInline::clone() const
+RenderPtr<RenderInline> RenderInline::cloneAsContinuation() const
 {
     RenderPtr<RenderInline> cloneInline = createRenderer<RenderInline>(*element(), RenderStyle::clone(style()));
     cloneInline->initializeStyle();
     cloneInline->setFlowThreadState(flowThreadState());
     cloneInline->setHasOutlineAutoAncestor(hasOutlineAutoAncestor());
+    cloneInline->setIsContinuation();
     return cloneInline;
 }
 
@@ -365,7 +367,7 @@ void RenderInline::splitInlines(RenderBlock* fromBlock, RenderBlock* toBlock,
                                 RenderObject* beforeChild, RenderBoxModelObject* oldCont)
 {
     // Create a clone of this inline.
-    RenderPtr<RenderInline> cloneInline = clone();
+    RenderPtr<RenderInline> cloneInline = cloneAsContinuation();
 #if ENABLE(FULLSCREEN_API)
     // If we're splitting the inline containing the fullscreened element,
     // |beforeChild| may be the renderer for the fullscreened element. However,
@@ -432,7 +434,7 @@ void RenderInline::splitInlines(RenderBlock* fromBlock, RenderBlock* toBlock,
         if (splitDepth < cMaxSplitDepth) {
             // Create a new clone.
             RenderPtr<RenderInline> cloneChild = WTFMove(cloneInline);
-            cloneInline = downcast<RenderInline>(*current).clone();
+            cloneInline = downcast<RenderInline>(*current).cloneAsContinuation();
 
             // Insert our child clone as the first child.
             cloneInline->addChildIgnoringContinuation(cloneChild.leakPtr());
@@ -1369,6 +1371,7 @@ void RenderInline::childBecameNonInline(RenderElement& child)
 {
     // We have to split the parent flow.
     RenderBlock* newBox = containingBlock()->createAnonymousBlock();
+    newBox->setIsContinuation();
     RenderBoxModelObject* oldContinuation = continuation();
     setContinuation(newBox);
     RenderObject* beforeChild = child.nextSibling();
