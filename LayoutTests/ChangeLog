@@ -1,5 +1,83 @@
 2017-10-10  Joanmarie Diggs  <jdiggs@igalia.com>
 
+        AX: [ATK] ARIA form role should be mapped to ATK_ROLE_LANDMARK; not ATK_ROLE_FORM
+        https://bugs.webkit.org/show_bug.cgi?id=178137
+
+        Reviewed by Chris Fleizach.
+
+        * platform/gtk/accessibility/roles-exposed-expected.txt: Updated expectations.
+
+2017-10-10  Matt Rajca  <mrajca@apple.com>
+
+        Respect audio rate change restrictions in HTMLMediaElement::setVolume.
+        https://bugs.webkit.org/show_bug.cgi?id=178140
+
+        Reviewed by Eric Carlson.
+
+        * media/audio-playback-volume-changes-with-restrictions-and-user-gestures-expected.txt: Added.
+        * media/audio-playback-volume-changes-with-restrictions-and-user-gestures.html: Added.
+        * media/audio-playback-volume-changes-with-restrictions-expected.txt: Added.
+        * media/audio-playback-volume-changes-with-restrictions.html: Added.
+        * platform/ios/TestExpectations:
+
+2017-10-10  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Loading should be disabled while constructing the fragment in WebContentReader::readWebArchive
+        https://bugs.webkit.org/show_bug.cgi?id=178118
+
+        Reviewed by Antti Koivisto.
+
+        Updated the existing tests to wait for images to load in each step explicitly instead of relying on
+        them being loaded synchronously or that it's loaded within 100-200ms.
+
+        * editing/pasteboard/4641033.html:
+        * editing/pasteboard/4947130.html:
+        * editing/pasteboard/4989774.html:
+        * editing/pasteboard/drag-selected-image-to-contenteditable.html:
+        * editing/selection/drag-to-contenteditable-iframe.html:
+        * platform/ios/TestExpectations: Skipped editing/selection/drag-to-contenteditable-iframe.html on iOS
+        since we don't support testing drag & drop on iOS. Also added [ Skip ] to other entires there.
+
+2017-10-10  Chris Dumez  <cdumez@apple.com>
+
+        Entries API should recognize path starting with 2 slashes as valid absolute path
+        https://bugs.webkit.org/show_bug.cgi?id=178135
+
+        Reviewed by Ryosuke Niwa.
+
+        Add layout test coverage.
+
+        * editing/pasteboard/entries-api/datatransfer-items-drop-getDirectory-expected.txt:
+        * editing/pasteboard/entries-api/datatransfer-items-drop-getDirectory.html:
+        * editing/pasteboard/entries-api/datatransfer-items-drop-getFile-expected.txt:
+        * editing/pasteboard/entries-api/datatransfer-items-drop-getFile.html:
+
+2017-10-10  Matt Lewis  <jlewis3@apple.com>
+
+        Unreviewed, rolling out r223110.
+
+        This caused consistent failures and timeouts on multiple
+        platforms.
+
+        Reverted changeset:
+
+        "Delete button doesn't fully delete certain emoji"
+        https://bugs.webkit.org/show_bug.cgi?id=178096
+        http://trac.webkit.org/changeset/223110
+
+2017-10-10  Antti Koivisto  <antti@apple.com>
+
+        RenderObject::destroy() should only be invoked after renderer has been removed from the tree
+        https://bugs.webkit.org/show_bug.cgi?id=178075
+
+        Reviewed by Zalan Bujtas.
+
+        * accessibility/mac/textbox-role-reports-notifications.html:
+
+        This passed because spurious AXValueChanged notifications. Force layout to prevent coalescing between mutations.
+
+2017-10-10  Joanmarie Diggs  <jdiggs@igalia.com>
+
         AX: [ATK] STATE_CHECKABLE should be removed from radio buttons in radiogroups with aria-readonly="true"
         https://bugs.webkit.org/show_bug.cgi?id=177931
 

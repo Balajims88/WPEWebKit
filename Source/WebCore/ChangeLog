@@ -1,3 +1,162 @@
+2017-10-10  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        AX: [ATK] ARIA form role should be mapped to ATK_ROLE_LANDMARK; not ATK_ROLE_FORM
+        https://bugs.webkit.org/show_bug.cgi?id=178137
+
+        Reviewed by Chris Fleizach.
+
+        Expose the ARIA form role as ATK_ROLE_LANDMARK; continue to expose the HTML form
+        element as ATK_ROLE_FORM.
+
+        No new tests needed due to existing coverage. Update expectations for roles-exposed.html.
+
+        * accessibility/atk/WebKitAccessibleWrapperAtk.cpp:
+        (atkRole):
+
+2017-10-10  Matt Rajca  <mrajca@apple.com>
+
+        Respect audio rate change restrictions in HTMLMediaElement::setVolume.
+        https://bugs.webkit.org/show_bug.cgi?id=178140
+
+        Reviewed by Eric Carlson.
+
+        Tests: media/audio-playback-volume-changes-with-restrictions-and-user-gestures.html
+               media/audio-playback-volume-changes-with-restrictions.html
+
+        It's currently possible for a website to start auto-playing media with a zero volume and then
+        programmatically set the volume to a non-zero value without a user gesture. This code path didn't
+        have to be considered previously because volume changes are not supported on iOS.
+
+        We currently pause media when an audio track comes in after an element has already started playing silently
+        in mediaPlayerDidAddAudioTrack. This patch does the same when a non-zero volume is set after a media
+        element already began playing silently and there is an audio rate change restriction.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::setVolume):
+
+2017-10-10  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Loading should be disabled while constructing the fragment in WebContentReader::readWebArchive
+        https://bugs.webkit.org/show_bug.cgi?id=178118
+
+        Reviewed by Antti Koivisto.
+
+        Disable image loading while constructing the document fragment in WebContentReader::readWebArchive
+        as we do in createFragmentAndAddResources for RTF/RTFD. This refactoring is needed to start using
+        blob URL in the pasted document fragment for webkit.org/b/124391.
+
+        Also modified WebContentReader::readWebArchive to take a reference to SharedBuffer instead of a pointer.
+
+        No new tests since existing tests have been updated to cover this behavior change.
+
+        * editing/WebContentReader.h:
+        * editing/cocoa/WebContentReaderCocoa.mm:
+        (WebCore::WebContentReader::readWebArchive): Use DeferredLoadingScope to disable the loader and images
+        while constructing the document fragment.
+        * platform/Pasteboard.h:
+        * platform/ios/PasteboardIOS.mm:
+        (WebCore::readPasteboardWebContentDataForType):
+        * platform/mac/PasteboardMac.mm:
+        (WebCore::Pasteboard::read):
+
+2017-10-10  Antti Koivisto  <antti@apple.com>
+
+        Layers should be destroyed by RenderLayerModelObject
+        https://bugs.webkit.org/show_bug.cgi?id=178139
+
+        Reviewed by Simon Fraser.
+
+        Clean up some FIXMEs.
+
+        * rendering/RenderLayerModelObject.cpp:
+        (WebCore::RenderLayerModelObject::willBeDestroyed):
+        (WebCore::RenderLayerModelObject::destroyLayer):
+        * rendering/RenderLayerModelObject.h:
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::willBeDestroyed):
+
+2017-10-10  Chris Dumez  <cdumez@apple.com>
+
+        Entries API should recognize path starting with 2 slashes as valid absolute path
+        https://bugs.webkit.org/show_bug.cgi?id=178135
+
+        Reviewed by Ryosuke Niwa.
+
+        Entries API should recognize paths starting with 2 slashes as valid absolute paths to match Chrome's behavior.
+        See https://github.com/WICG/entries-api/commit/990454758005a6039655835503d551015e346d9d
+
+        This was causing us to fail some manual web-platform-tests.
+
+        No new tests, updated existing tests.
+
+        * Modules/entriesapi/DOMFileSystem.cpp:
+        (WebCore::isValidPathSegment):
+        (WebCore::isZeroOrMorePathSegmentsSeparatedBySlashes):
+        (WebCore::isValidRelativeVirtualPath):
+        (WebCore::isValidVirtualPath):
+
+2017-10-10  Matt Lewis  <jlewis3@apple.com>
+
+        Unreviewed, rolling out r223110.
+
+        This caused consistent failures and timeouts on multiple
+        platforms.
+
+        Reverted changeset:
+
+        "Delete button doesn't fully delete certain emoji"
+        https://bugs.webkit.org/show_bug.cgi?id=178096
+        http://trac.webkit.org/changeset/223110
+
+2017-10-10  Antti Koivisto  <antti@apple.com>
+
+        RenderObject::destroy() should only be invoked after renderer has been removed from the tree
+        https://bugs.webkit.org/show_bug.cgi?id=178075
+
+        Reviewed by Zalan Bujtas.
+
+        This patch fixes the remaining cases where the renderer is still in the tree while destroy()
+        is called and adds the assert.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::removeLeftoverAnonymousBlock):
+        (WebCore::RenderBlock::takeChild):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::willBeDestroyed):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::~RenderLayer):
+
+            Null the parent pointers for m_scrollCorner/m_resizer.
+
+        (WebCore::RenderLayer::calculateClipRects const):
+        * rendering/RenderLayer.h:
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::willBeDestroyed):
+        (WebCore::RenderObject::removeFromParentAndDestroyCleaningUpAnonymousWrappers):
+        (WebCore::RenderObject::destroy):
+
+            Use RELEASE_ASSERT as these are cheap and important checks.
+            Also turn isBeingDestroyed test into RELEASE_ASSERT.
+            Remove AX call that no longer does anything.
+
+        (WebCore::RenderObject::destroyAndCleanupAnonymousWrappers): Deleted.
+        * rendering/RenderObject.h:
+        * rendering/RenderRubyBase.cpp:
+        (WebCore::RenderRubyBase::moveBlockChildren):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::collapseAndDestroyAnonymousSiblingRows):
+        (WebCore::RenderTableRow::destroyAndCollapseAnonymousSiblingRows): Deleted.
+
+            Renamed and made this no longer destroy itself. The caller now takes care of that.
+            Removed an unnecessary lambda.
+
+        * rendering/RenderTableRow.h:
+        * style/RenderTreeUpdater.cpp:
+        (WebCore::RenderTreeUpdater::tearDownRenderers):
+        (WebCore::RenderTreeUpdater::tearDownRenderer):
+        * style/RenderTreeUpdaterListItem.cpp:
+        (WebCore::RenderTreeUpdater::ListItem::updateMarker):
+
 2017-10-09  Antti Koivisto  <antti@apple.com>
 
         Add isContinuation bit
