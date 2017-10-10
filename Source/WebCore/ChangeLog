@@ -1,3 +1,122 @@
+2017-10-10  Zalan Bujtas  <zalan@apple.com>
+
+        AccessibilityRenderObject should not hold a raw pointer to RenderObject
+        https://bugs.webkit.org/show_bug.cgi?id=178144
+        <rdar://problem/34919287>
+
+        Reviewed by Chris Fleizach.
+
+        m_renderer's lifetime is not directly tied to the AX wrapper object's lifetime.
+
+        Covered by existing tests.
+
+        * accessibility/AccessibilityListBox.cpp:
+        (WebCore::AccessibilityListBox::elementAccessibilityHitTest const):
+        * accessibility/AccessibilityMathMLElement.cpp:
+        (WebCore::AccessibilityMathMLElement::isMathFenceOperator const):
+        (WebCore::AccessibilityMathMLElement::isMathSeparatorOperator const):
+        (WebCore::AccessibilityMathMLElement::mathLineThickness const):
+        * accessibility/AccessibilityMenuList.cpp:
+        (WebCore::AccessibilityMenuList::press):
+        (WebCore::AccessibilityMenuList::isCollapsed const):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::AccessibilityRenderObject):
+        (WebCore::AccessibilityRenderObject::renderBoxModelObject const):
+        (WebCore::AccessibilityRenderObject::setRenderer):
+        (WebCore::AccessibilityRenderObject::previousSibling const):
+        (WebCore::AccessibilityRenderObject::anchorElement const):
+        (WebCore::AccessibilityRenderObject::helpText const):
+        (WebCore::AccessibilityRenderObject::boundingBoxRect const):
+        (WebCore::AccessibilityRenderObject::supportsPath const):
+        (WebCore::AccessibilityRenderObject::elementPath const):
+        (WebCore::AccessibilityRenderObject::computeAccessibilityIsIgnored const):
+        (WebCore::AccessibilityRenderObject::index const):
+        (WebCore::AccessibilityRenderObject::handleActiveDescendantChanged):
+        (WebCore::AccessibilityRenderObject::observableObject const):
+        (WebCore::AccessibilityRenderObject::determineAccessibilityRole):
+        (WebCore::AccessibilityRenderObject::textChanged):
+        (WebCore::AccessibilityRenderObject::remoteSVGRootElement const):
+        (WebCore::AccessibilityRenderObject::roleValueForMSAA const):
+        (WebCore::AccessibilityRenderObject::getScrollableAreaIfScrollable const):
+        (WebCore::AccessibilityRenderObject::scrollTo const):
+        * accessibility/AccessibilityRenderObject.h:
+        (WebCore::AccessibilityRenderObject::setRenderObject):
+        * accessibility/AccessibilitySlider.cpp:
+        (WebCore::AccessibilitySlider::elementAccessibilityHitTest const):
+        * accessibility/AccessibilityTable.cpp:
+        (WebCore::AccessibilityTable::addChildren):
+        * accessibility/AccessibilityTableCell.cpp:
+        (WebCore::AccessibilityTableCell::computeAccessibilityIsIgnored const):
+        (WebCore::AccessibilityTableCell::parentTable const):
+        (WebCore::AccessibilityTableCell::rowIndexRange const):
+        (WebCore::AccessibilityTableCell::columnIndexRange const):
+        (WebCore::AccessibilityTableCell::titleUIElement const):
+
+2017-10-10  Sam Weinig  <sam@webkit.org>
+
+        Replace copyKeysToVector/copyValuesToVector with copyToVector(map.keys())/copyToVector(map.values())
+        https://bugs.webkit.org/show_bug.cgi?id=178102
+
+        Reviewed by Tim Horton.
+
+        * Modules/geolocation/Geolocation.cpp:
+        (WebCore::Geolocation::Watchers::getNotifiersVector const):
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::connectionClosedFromServer):
+        * Modules/indexeddb/client/IDBConnectionProxy.cpp:
+        (WebCore::IDBClient::IDBConnectionProxy::connectionToServerLost):
+        * Modules/indexeddb/server/UniqueIDBDatabase.cpp:
+        (WebCore::IDBServer::UniqueIDBDatabase::immediateCloseForUserDelete):
+        * Modules/mediastream/MediaStream.cpp:
+        (WebCore::MediaStream::getTracks const):
+        * bindings/js/ScriptController.cpp:
+        (WebCore::ScriptController::windowProxies):
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::item const):
+        * dom/Document.cpp:
+        (WebCore::Document::prepareForDestruction):
+        * dom/DocumentMarkerController.cpp:
+        (WebCore::DocumentMarkerController::removeMarkers):
+        * inspector/InspectorWorkerAgent.cpp:
+        (WebCore::InspectorWorkerAgent::disconnectFromAllWorkerInspectorProxies):
+        * inspector/NetworkResourcesData.cpp:
+        * loader/DocumentLoader.cpp:
+        (WebCore::cancelAll):
+        (WebCore::setAllDefersLoading):
+        (WebCore::areAllLoadersPageCacheAcceptable):
+        * loader/cache/MemoryCache.cpp:
+        (WebCore::MemoryCache::forEachSessionResource):
+        * loader/mac/DocumentLoaderMac.cpp:
+        (WebCore::scheduleAll):
+        (WebCore::unscheduleAll):
+        * page/ResourceUsageThread.cpp:
+        (WebCore::ResourceUsageThread::notifyObservers):
+        * platform/mediastream/MediaStreamPrivate.cpp:
+        (WebCore::MediaStreamPrivate::tracks const):
+
+            Replace copyKeysToVector / copyValuesToVector with copyToVector(map.keys()) / copyToVector(map.values())
+
+2017-10-10  Yoshiaki Jitsukawa  <Yoshiaki.Jitsukawa@sony.com>
+
+        Fix MSVC build with ENCRYPTED_MEDIA enabled
+        https://bugs.webkit.org/show_bug.cgi?id=177803
+
+        Reviewed by Alex Christensen.
+
+        As a workaround for MSVC, a weak pointer of "this" is captured
+        at the outermost lambda expression.
+
+        * Modules/encryptedmedia/MediaKeySession.cpp:
+        (WebCore::MediaKeySession::generateRequest):
+        (WebCore::MediaKeySession::load):
+        (WebCore::MediaKeySession::update):
+        (WebCore::MediaKeySession::close):
+        (WebCore::MediaKeySession::remove):
+        * platform/encryptedmedia/clearkey/CDMClearKey.cpp:
+        (WebCore::CDMInstanceClearKey::updateLicense):
+        (WebCore::CDMInstanceClearKey::loadSession):
+        (WebCore::CDMInstanceClearKey::removeSessionData):
+
 2017-10-10  Joanmarie Diggs  <jdiggs@igalia.com>
 
         AX: [ATK] ARIA form role should be mapped to ATK_ROLE_LANDMARK; not ATK_ROLE_FORM
