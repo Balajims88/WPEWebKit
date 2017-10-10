@@ -1,3 +1,145 @@
+2017-10-10  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        AX: [ATK] STATE_CHECKABLE should be removed from radio buttons in radiogroups with aria-readonly="true"
+        https://bugs.webkit.org/show_bug.cgi?id=177931
+
+        Reviewed by Chris Fleizach.
+
+        * accessibility/gtk/aria-readonly-radiogroup-expected.txt: Added.
+        * accessibility/gtk/aria-readonly-radiogroup.html: Added.
+
+2017-10-09  Chris Dumez  <cdumez@apple.com>
+
+        Calling fileSystemDirectoryEntry.getDirectory() with empty path should not fail
+        https://bugs.webkit.org/show_bug.cgi?id=178114
+
+        Reviewed by Ryosuke Niwa.
+
+        Extend layout test coverage.
+
+        * editing/pasteboard/entries-api/datatransfer-items-drop-getDirectory-expected.txt:
+        * editing/pasteboard/entries-api/datatransfer-items-drop-getDirectory.html:
+
+2017-10-09  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Mark http/tests/paymentrequest/payment-request-abort-method.https.html as flaky.
+        https://bugs.webkit.org/show_bug.cgi?id=178107
+
+        Unreviewed test gardening.
+
+        * platform/ios-wk2/TestExpectations:
+        * platform/mac-wk2/TestExpectations:
+
+2017-10-09  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Rebaseline imported/w3c/web-platform-tests/dom/events/EventTarget-dispatchEvent.html for iOS.
+
+        Unreviewed test gardening.
+
+        * platform/ios-simulator-wk2/imported/w3c/web-platform-tests/dom/events/EventTarget-dispatchEvent-expected.txt: Removed.
+        * platform/ios-wk2/imported/w3c/web-platform-tests/dom/events/EventTarget-dispatchEvent-expected.txt: Removed.
+        * platform/ios/imported/w3c/web-platform-tests/dom/events/EventTarget-dispatchEvent-expected.txt:
+
+2017-10-09  Myles C. Maxfield  <mmaxfield@apple.com>
+
+        Delete button doesn't fully delete certain emoji
+        https://bugs.webkit.org/show_bug.cgi?id=178096
+        <rdar://problem/34785106>
+
+        Reviewed by Simon Fraser.
+
+        * editing/deleting/delete-emoji-2.html:
+        * platform/mac/editing/deleting/delete-emoji-expected.txt:
+        * platform/mac/editing/deleting/delete-emoji-2-expected.txt:
+        * platform/ios/editing/deleting/delete-emoji-expected.txt:
+        * platform/ios/editing/deleting/delete-emoji-2-expected.txt:
+        * platform/win/TestExpectations:
+
+2017-10-09  Michael Saboff  <msaboff@apple.com>
+
+        Implement RegExp Unicode property escapes
+        https://bugs.webkit.org/show_bug.cgi?id=172069
+
+        Reviewed by JF Bastien.
+
+        New test.
+
+        * js/regexp-unicode-properties-expected.txt: Added.
+        * js/regexp-unicode-properties.html: Added.
+        * js/script-tests/regexp-unicode-properties.js: Added.
+
+2017-10-09  Andy Estes  <aestes@apple.com>
+
+        [Payment Request] Implement PaymentRequest.show() and PaymentRequest.hide()
+        https://bugs.webkit.org/show_bug.cgi?id=178043
+        <rdar://problem/34076639>
+
+        Reviewed by Tim Horton.
+
+        Copied payment-request-abort-method.https.html and payment-request-show-method.https.html
+        from web-platform-tests/payment-request/ and changed the payment method from basic-card to
+        Apple Pay. This needs to eventually be upstreamed back to WPT.
+
+        * TestExpectations:
+        * http/tests/paymentrequest/payment-request-abort-method.https-expected.txt: Added.
+        * http/tests/paymentrequest/payment-request-abort-method.https.html: Added.
+        * http/tests/paymentrequest/payment-request-show-method.https-expected.txt: Added.
+        * http/tests/paymentrequest/payment-request-show-method.https.html: Added.
+        * platform/ios-wk2/TestExpectations:
+        * platform/mac-wk2/TestExpectations:
+
+2017-10-09  Youenn Fablet  <youenn@apple.com>
+
+        Add quota to cache API
+        https://bugs.webkit.org/show_bug.cgi?id=177552
+
+        Reviewed by Alex Christensen.
+
+        * http/wpt/cache-storage/cache-quota.https.any-expected.txt: Added.
+        * http/wpt/cache-storage/cache-quota.https.any.html: Added.
+        * http/wpt/cache-storage/cache-quota.https.any.js: Added.
+
+2017-10-09  Matt Lewis  <jlewis3@apple.com>
+
+        Unskipped http/tests/cache/disk-cache/disk-cache-validation-no-body.html
+        https://bugs.webkit.org/show_bug.cgi?id=178019
+
+        Unreviewed test gardening.
+        * platform/mac-wk2/TestExpectations:
+
+2017-10-09  Joseph Pecoraro  <pecoraro@apple.com>
+
+        Web Inspector: Network Tab - Cookies Detail View
+        https://bugs.webkit.org/show_bug.cgi?id=177988
+        <rdar://problem/34071927>
+
+        Reviewed by Brian Burg.
+
+        * inspector/unit-tests/cookie-expected.txt: Added.
+        * inspector/unit-tests/cookie.html: Added.
+
+2017-10-09  Matt Lewis  <jlewis3@apple.com>
+
+        Marked inspector/dom/csp-big5-hash.html as flaky.
+        https://bugs.webkit.org/show_bug.cgi?id=177608
+
+        Unreviewed test garding.
+
+        * platform/mac/TestExpectations:
+
+2017-10-09  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Unreviewed, rolling out r223021.
+
+        LayoutTests added with this change are failing.
+
+        Reverted changeset:
+
+        "[Payment Request] Implement PaymentRequest.show() and
+        PaymentRequest.hide()"
+        https://bugs.webkit.org/show_bug.cgi?id=178043
+        http://trac.webkit.org/changeset/223021
+
 2017-10-09  Joanmarie Diggs  <jdiggs@igalia.com>
 
         AX: [ATK] Explicitly-set aria-sort value of "none" should be exposed as an object attribute
