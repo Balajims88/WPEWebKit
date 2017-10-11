@@ -1,3 +1,209 @@
+2017-10-11  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        [ATK] Expose value of aria-keyshortcuts as object attribute
+        https://bugs.webkit.org/show_bug.cgi?id=171175
+
+        Reviewed by Chris Fleizach.
+
+        Expose the author-provided string through the "keyshortcuts" object attribute.
+
+        Test: accessibility/gtk/aria-keyshortcuts.html
+
+        * accessibility/AccessibilityObject.cpp:
+        (WebCore::AccessibilityObject::ariaKeyShortcutsValue const):
+        * accessibility/AccessibilityObject.h:
+        * accessibility/atk/WebKitAccessibleWrapperAtk.cpp:
+        (webkitAccessibleGetAttributes):
+        * html/HTMLAttributeNames.in:
+
+2017-10-11  Yusuke Suzuki  <utatane.tea@gmail.com>
+
+        [JSC] Drop Instantiate hook in ES6 module loader
+        https://bugs.webkit.org/show_bug.cgi?id=178162
+
+        Reviewed by Sam Weinig.
+
+        Drop instantiate hooks.
+        No behavior change.
+
+        * bindings/js/JSDOMWindowBase.cpp:
+        * bindings/js/JSWorkerGlobalScopeBase.cpp:
+
+2017-10-11  Alicia Boya García  <aboya@igalia.com>
+
+        [MSE][GStreamer] Add dump of append pipeline
+        https://bugs.webkit.org/show_bug.cgi?id=178074
+
+        Reviewed by Xabier Rodriguez-Calvar.
+
+        Enable dump of AppendPipeline.
+
+        * platform/graphics/gstreamer/mse/AppendPipeline.cpp:
+        (WebCore::appendPipelineStateChangeMessageCallback):
+        (WebCore::AppendPipeline::AppendPipeline):
+        (WebCore::AppendPipeline::handleStateChangeMessage):
+        * platform/graphics/gstreamer/mse/AppendPipeline.h:
+
+2017-09-27  Frederic Wang  <fwang@igalia.com>
+
+        [iOS] Do not flatten frames when async frame scrolling is enabled
+        https://bugs.webkit.org/show_bug.cgi?id=173704
+
+        Reviewed by Simon Fraser.
+
+        This patch disables frame flattening when async frame scrolling is enabled on iOS, as
+        otherwise you can not scroll them. Once iframe scrolling is implemented in iOS (bug 149264),
+        developers and beta testers will be able to check it by enabling "Async Frame Scrolling"
+        in the "Experimental WebKit Features" menu of Safari iOS.
+
+        Test: platform/ios/fast/frames/flattening/iframe-flattening-with-async-frame-scrolling.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::frameFlatteningEnabled): Use effectiveFrameFlattening()
+        * page/Settings.cpp:
+        (WebCore::Settings::effectiveFrameFlattening): New function to return frameFlattening() or do
+        some exceptions on iOS.
+        * page/Settings.h: Declare effectiveFrameFlattening.
+        * rendering/RenderFrameSet.cpp:
+        (WebCore::RenderFrameSet::flattenFrameSet): Use effectiveFrameFlattening()
+        * rendering/RenderIFrame.cpp:
+        (WebCore::RenderIFrame::flattenFrame): Ditto.
+        * rendering/RenderView.cpp:
+        (WebCore::FrameFlatteningLayoutDisallower::FrameFlatteningLayoutDisallower): Ditto.
+
+2017-10-10  Xabier Rodriguez Calvar  <calvaris@igalia.com>
+
+        [GStreamer] Fix double seek requested by downloadbuffer GStreamer element in webkibwebsrc
+        https://bugs.webkit.org/show_bug.cgi?id=178079
+
+        Reviewed by Žan Doberšek.
+
+        When the downloadbuffer GStreamer element requests two seeks too
+        close to each other there's some rare race condition where our
+        source answers that it is not seekable and ends up with
+        downloadbuffer element to seek beyond the file size, which causes
+        the server to issue a 416 HTTP error code eventually, causing our
+        MediaPlayer to stop.
+
+        * platform/graphics/gstreamer/WebKitWebSourceGStreamer.cpp:
+        (webKitWebSrcStop): We only unset he seekable attribute if we are
+        not seeking.
+
+2017-10-10  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Enable custom pasteboard data in DumpRenderTree and WebKitTestRunner
+        https://bugs.webkit.org/show_bug.cgi?id=178154
+
+        Reviewed by Wenson Hsieh.
+
+        Extracted the logic to compute the default enabled-ness of custom pasteboard data as
+        Settings::defaultCustomPasteboardDataEnabled() to be called by WebKit1 and WebKit2 layers.
+
+        * page/Settings.cpp:
+        (WebCore::Settings::defaultCustomPasteboardDataEnabled): Extracted from customPasteboardDataEnabled.
+        (WebCore::Settings::customPasteboardDataEnabled): Deleted. Now inlined in the header file.
+        * page/Settings.h:
+        (WebCore::Settings::customPasteboardDataEnabled):
+        * platform/cocoa/PasteboardCocoa.mm:
+        (WebCore::Pasteboard::read): Fixed a bug that we were adding MIME type to the map before checking that
+        we could actually read the buffer. We shouldn't skip a type (NSTIFFPboardType and kUTTypeTIFF for now)
+        if an equivalent type had failed to read.
+
+2017-10-10  Andy Estes  <aestes@apple.com>
+
+        [Payment Request] Validate that all PaymentCurrencyAmounts use the same currency code when using Apple Pay
+        https://bugs.webkit.org/show_bug.cgi?id=178150
+
+        Reviewed by Tim Horton.
+
+        Apple Pay requires a single currency code, but the Payment Request API allows the client to
+        specify a currency code for each PaymentCurrencyAmount.
+
+        Instead of having a required currencyCode property on ApplePayRequest and ignoring the
+        currency property on PaymentCurrencyAmount, validate that all PaymentCurrencyAmounts use the
+        same currency code and use that as ApplePaySessionPaymentRequest's currencyCode.
+
+        Added test cases to http/tests/ssl/applepay/PaymentRequest.https.html.
+
+        * Modules/applepay/ApplePayPaymentRequest.h:
+        * Modules/applepay/ApplePayPaymentRequest.idl:
+        * Modules/applepay/ApplePayRequestBase.cpp:
+        (WebCore::convertAndValidate):
+        * Modules/applepay/ApplePayRequestBase.h:
+        * Modules/applepay/ApplePayRequestBase.idl:
+        * Modules/applepay/ApplePaySession.cpp:
+        (WebCore::convertAndValidate):
+        * Modules/applepay/paymentrequest/ApplePayPaymentHandler.cpp:
+        (WebCore::validate):
+        (WebCore::convertAndValidate):
+        (WebCore::ApplePayPaymentHandler::show):
+        * Modules/applepay/paymentrequest/ApplePayRequest.idl:
+
+2017-10-10  Andy Estes  <aestes@apple.com>
+
+        [Payment Request] Implement PaymentRequest.canMakePayment()
+        https://bugs.webkit.org/show_bug.cgi?id=178048
+
+        Reviewed by Youenn Fablet.
+
+        Test: http/tests/paymentrequest/payment-request-canmakepayment-method.https.html
+
+        * Modules/applepay/paymentrequest/ApplePayPaymentHandler.cpp:
+        (WebCore::ApplePayPaymentHandler::convertData): Moved
+        ApplePayRequest-to-ApplePaySessionPaymentRequest conversion from here to show().
+        (WebCore::ApplePayPaymentHandler::show): Returned an exception if
+        ApplePaySessionPaymentRequest conversion fails.
+        (WebCore::shouldDiscloseApplePayCapability): Checked if we are in an ephimeral session or if
+        Settings::applePayCapabilityDisclosureAllowed() is false.
+        (WebCore::ApplePayPaymentHandler::canMakePayment): Called
+        PaymentCoordinator::canMakePayments() or PaymentCoordinator::canMakePaymentsWithActiveCard()
+        depending on shouldDiscloseApplePayCapability().
+        * Modules/applepay/paymentrequest/ApplePayPaymentHandler.h:
+        * Modules/applepay/paymentrequest/ApplePayRequest.h:
+        * Modules/applepay/paymentrequest/ApplePayRequest.idl: Defined merchantIdentifier.
+        * Modules/paymentrequest/PaymentHandler.h:
+        * Modules/paymentrequest/PaymentRequest.cpp:
+        (WebCore::parse): Moved JSON-parsing to here from show().
+        (WebCore::PaymentRequest::show): Returned the exception from PaymentHandler::show().
+        (WebCore::PaymentRequest::canMakePayment): For each payment method, try to create a
+        PaymentHandler.
+        For the first valid PaymentHandler, call canMakePayment() and pass a lambda that resolves
+        the promise.
+        * Modules/paymentrequest/PaymentRequest.h:
+        * Modules/paymentrequest/PaymentRequest.idl: Added CallWith=Document annotations to show()
+        and canMakePayment().
+
+2017-10-10  Chris Dumez  <cdumez@apple.com>
+
+        Unreviewed, really fix the build with certain SDKs.
+
+        Follow-up to r223154, which fixed the wrong lambda.
+
+        * Modules/entriesapi/DOMFileSystem.cpp:
+        (WebCore::DOMFileSystem::getEntry):
+        (WebCore::DOMFileSystem::getFile):
+
+2017-10-10  Chris Dumez  <cdumez@apple.com>
+
+        Unreviewed, fix build with certain SDKs.
+
+        Stop capturing |this| unnecessarily in lambda.
+
+        * Modules/entriesapi/DOMFileSystem.cpp:
+        (WebCore::DOMFileSystem::getEntry):
+
+2017-10-10  Matt Lewis  <jlewis3@apple.com>
+
+        Unreviewed, rolling out r223148.
+
+        This caused build failures.
+
+        Reverted changeset:
+
+        "Fix MSVC build with ENCRYPTED_MEDIA enabled"
+        https://bugs.webkit.org/show_bug.cgi?id=177803
+        http://trac.webkit.org/changeset/223148
+
 2017-10-10  Zalan Bujtas  <zalan@apple.com>
 
         AccessibilityRenderObject should not hold a raw pointer to RenderObject
