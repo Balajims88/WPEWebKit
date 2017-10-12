@@ -1,3 +1,515 @@
+2017-10-11  Brent Fulgham  <bfulgham@apple.com>
+
+        Correct nullptr deref in selection handling.
+        https://bugs.webkit.org/show_bug.cgi?id=178189
+        <rdar://problem/33833012>
+
+        Reviewed by Ryosuke Niwa.
+
+        The VisibleSelection::toNormalizedRange returns nullptr for certain conditions (e.g., 'isNone'
+        and 'isOrphaned' cases). It's possible to crash the WebProcess by executing a code path with
+        an orphaned selection range.
+
+        The return value of 'toNormalizedRange' is checked for nullptr in many places, but not everywhere.
+        This patch adds those missing nullptr checks.
+
+        * accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:
+        (-[WebAccessibilityObjectWrapper textMarkerRangeForSelection]):
+        * editing/DeleteSelectionCommand.cpp:
+        (WebCore::DeleteSelectionCommand::makeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss):
+        * editing/EditingStyle.cpp:
+        (WebCore::EditingStyle::styleAtSelectionStart):
+        * editing/Editor.cpp:
+        (WebCore::Editor::misspelledWordAtCaretOrRange const):
+        * page/DOMSelection.cpp:
+        (WebCore::DOMSelection::containsNode const):
+        * page/DragController.cpp:
+        (WebCore::DragController::concludeEditDrag):
+
+2017-10-11  Ryan Haddad  <ryanhaddad@apple.com>
+
+        Unreviewed, rolling out r223215.
+
+        This change broke the Sierra build.
+
+        Reverted changeset:
+
+        "[Apple Pay] Add subLocality and subAdministrativeArea to
+        ApplePayPaymentContact"
+        https://bugs.webkit.org/show_bug.cgi?id=178191
+        https://trac.webkit.org/changeset/223215
+
+2017-10-11  Chris Dumez  <cdumez@apple.com>
+
+        XMLHttpRequest: do not sniff text/html, and do not sniff XML when responseType is set to "text"
+        https://bugs.webkit.org/show_bug.cgi?id=168724
+
+        Reviewed by Ryosuke Niwa.
+
+        WebKit enabled HTML / XML charset detection for HTML-ish / XML-ish
+        responses even when response type is text, which does not match the
+        specification.
+
+        This patch is based on the following Blink patch by Yutaka Hirano <yhirano@chromium.org>:
+        - https://chromium.googlesource.com/chromium/src.git/+/47e4fc53e6d68c0a788fcc26de598b9e3848033f
+
+        Tests:
+        imported/w3c/web-platform-tests/XMLHttpRequest/responsetext-decoding.htm
+        imported/w3c/web-platform-tests/XMLHttpRequest/responsedocument-decoding.htm
+
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::createDecoder const):
+        (WebCore::XMLHttpRequest::didReceiveData):
+        * xml/XMLHttpRequest.h:
+
+2017-10-11  Andy Estes  <aestes@apple.com>
+
+        [Apple Pay] Add subLocality and subAdministrativeArea to ApplePayPaymentContact
+        https://bugs.webkit.org/show_bug.cgi?id=178191
+        <rdar://problem/34906367>
+
+        Reviewed by Tim Horton.
+
+        Added test cases to http/tests/ssl/applepay/ApplePaySession.html.
+
+        * Modules/applepay/ApplePayPaymentContact.h:
+        * Modules/applepay/ApplePayPaymentContact.idl:
+        * Modules/applepay/cocoa/PaymentContactCocoa.mm:
+        (WebCore::convert):
+
+2017-10-11  Youenn Fablet  <youenn@apple.com>
+
+        Add API to clean CacheStorage data
+        https://bugs.webkit.org/show_bug.cgi?id=178034
+
+        Reviewed by Chris Dumez.
+
+        Test: http/tests/cache-storage/cache-clearing.https.html
+
+        * platform/FileSystem.h:
+
+2017-10-11  David Kilzer  <ddkilzer@apple.com>
+
+        Part 2: Fix -Wcast-qual and -Wunused-lambda-capture warnings in WebCore with new clang compiler
+        <https://webkit.org/b/178036>
+        <rdar://problem/33667497>
+
+        Reviewed by Chris Dumez.
+
+        * Modules/cache/WorkerCacheStorageConnection.cpp:
+        (WebCore::WorkerCacheStorageConnection::doRemove):
+        - Change ASSERT() to ASSERT_UNUSED() to suppress warnings about
+          unused lambda capture for 'cacheIdentifier' in Release builds.
+        * bridge/objc/objc_class.mm:
+        (JSC::Bindings::ObjcClass::classForIsA): Change C-style cast
+        into reinterpret_cast and const_cast to go from CFTypeRef to
+        ObjcClass*.
+        * crypto/mac/CryptoKeyRSAMac.cpp:
+        (WebCore::castDataArgumentToCCRSACryptorCreateFromDataIfNeeded):
+        Add.  Introduce method to add a required const_cast for older
+        OSes since the signature of CCRSACryptorCreateFromData() changed
+        in iOS 11 & High Sierra.
+        (WebCore::CryptoKeyRSA::create): Use
+        castDataArgumentToCCRSACryptorCreateFromDataIfNeeded().
+        * platform/graphics/cocoa/WebCoreDecompressionSession.mm:
+        (WebCore::WebCoreDecompressionSession::handleDecompressionOutput):
+        Remove unused lambda capture for 'status'.
+
+2017-10-11  Chris Dumez  <cdumez@apple.com>
+
+        [Geolocation] Expose Coordinates.floorLevel
+        https://bugs.webkit.org/show_bug.cgi?id=178173
+        <rdar://problem/34918936>
+
+        Reviewed by Ryosuke Niwa.
+
+        Expose Coordinates.floorLevel via the Geolocation API. This is currently
+        a WebKit-specific extension and it is only populated on iOS / WKTR / DRT.
+        It is null on other platforms.
+
+        Test: fast/dom/Geolocation/floorLevel.html
+
+        * Modules/geolocation/Coordinates.h:
+        (WebCore::Coordinates::floorLevel const):
+        * Modules/geolocation/Coordinates.idl:
+        * Modules/geolocation/GeolocationPosition.h:
+        (WebCore::GeolocationPosition::encode const):
+        (WebCore::GeolocationPosition::decode):
+        * Modules/geolocation/ios/GeolocationPositionIOS.mm:
+        (WebCore::GeolocationPosition::GeolocationPosition):
+        * page/Settings.in:
+
+2017-10-11  Simon Fraser  <simon.fraser@apple.com>
+
+        Avoid triggering layout from style change
+        https://bugs.webkit.org/show_bug.cgi?id=178184
+        rdar://problem/34699113
+
+        Reviewed by Zalan Bujtas.
+
+        It's bad for RenderBox::styleDidChange() to scroll RenderLayers, because that
+        can trigger layout via FrameView::updateWidgetPositions() and ScrollingCoordinator::absoluteEventTrackingRegions().
+        So postpone the scrolling until after layout.
+
+        Test: fast/scrolling/adjust-scroll-offset-on-zoom.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleDidChange):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPositions):
+        (WebCore::RenderLayer::setPostLayoutScrollPosition):
+        (WebCore::RenderLayer::applyPostLayoutScrollPositionIfNeeded):
+        * rendering/RenderLayer.h:
+
+2017-10-11  Youenn Fablet  <youenn@apple.com>
+
+        Bump default cache storage quota to 20MB
+        https://bugs.webkit.org/show_bug.cgi?id=178132
+
+        Reviewed by Alex Christensen.
+
+        Covered by http/wpt/cache-storage/cache-quota.any.html.
+
+        * platform/network/NetworkStorageSession.h:
+        (WebCore::NetworkStorageSession::cacheStoragePerOriginQuota const):
+        (WebCore::NetworkStorageSession::setCacheStoragePerOriginQuota):
+
+2017-10-11  Myles C. Maxfield  <mmaxfield@apple.com>
+
+        Allow PAL to log messages
+        https://bugs.webkit.org/show_bug.cgi?id=171523
+
+        Reviewed by Alex Christensen.
+
+        Make the model of WebCore/PAL match the model of WebKit/WebCore. This is because PAL will
+        need to log things (because existing files in WebCore/platform need to log things).
+
+        No new tests because there is no behavior change.
+
+        * WebCore.xcodeproj/project.pbxproj:
+        * page/mac/PageMac.mm:
+        (WebCore::Page::platformInitialize):
+        * platform/Logging.cpp:
+        (WebCore::registerNotifyCallback): Deleted.
+        * platform/Logging.h:
+        * rendering/SimpleLineLayout.cpp:
+        (WebCore::SimpleLineLayout::canUseForWithReason):
+
+2017-10-11  Chris Dumez  <cdumez@apple.com>
+
+        Unreviewed, fix build with some SDKs.
+
+        Stop capturing |this| unnecessarily in lambda.
+
+        * Modules/entriesapi/FileSystemDirectoryEntry.cpp:
+        (WebCore::FileSystemDirectoryEntry::getEntry):
+
+2017-10-11  Chris Dumez  <cdumez@apple.com>
+
+        Unreviewed, fix build with some SDKs.
+
+        Stop capturing |this| unnecessarily in lambda.
+
+        * Modules/entriesapi/DOMFileSystem.cpp:
+        (WebCore::DOMFileSystem::getFile):
+
+2017-10-11  Daniel Bates  <dabates@apple.com>
+
+        Extract logic to paint composition underlines to its own function
+        https://bugs.webkit.org/show_bug.cgi?id=178038
+
+        Reviewed by Zalan Bujtas.
+
+        No functionality changed. So, no new tests.
+
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::paint): Modified to call paintCompositionUnderlines().
+        (WebCore::InlineTextBox::paintCompositionUnderlines const): Added; extract code
+        from InlineTextBox::paint() and modernized it.
+        (WebCore::InlineTextBox::paintCompositionUnderline const): Added.
+        (WebCore::InlineTextBox::paintCompositionUnderline): Deleted; made const.
+        * rendering/InlineTextBox.h:
+
+2017-10-11  Daniel Bates  <dabates@apple.com>
+
+        InlineTextBox::isSelected() should only return true for a non-empty selection
+        and remove incorrect FIXME from InlineTextBox::localSelectionRect()
+        https://bugs.webkit.org/show_bug.cgi?id=160786
+
+        Reviewed by Zalan Bujtas.
+
+        Partial revert of r204400 in InlineTextBox::{isSelected, localSelectionRect}().
+
+        The function InlineTextBox::isSelected() should only return true for a non-empty selection.
+        Also remove an incorrect FIXME added to InlineTextBox::localSelectionRect() that questioned
+        whether it was correct for it to return an empty rectangle. It is correct for it to return
+        such a rectangle because this function is used to implement Element.getClientRects(). And
+        Element.getClientRects() can return a rectangle with zero width or zero height by step 3
+        of algorithm getClientRects() of section Extensions to the Element interface of the
+        CSSOM View Module spec., <https://drafts.csswg.org/cssom-view/> (Editor's Draft, 15 September 2017).
+
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::isSelected const): Only return true for a non-empty selection
+        and remove unnecessary FIXME. Also rename variables to improve readability.
+        (WebCore::InlineTextBox::localSelectionRect const): Remove inaccurate FIXME comment.
+        * rendering/InlineTextBox.h:
+
+2017-10-11  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Sanitize URL in pasteboard for other applications and cross origin content
+        https://bugs.webkit.org/show_bug.cgi?id=178060
+        <rdar://problem/34874518>
+
+        Reviewed by Wenson Hsieh.
+
+        This patch introduces the sanitization of URL when written from a web content to prevent web content from
+        exploiting the URL parser of other applications in the system particularly of those that actively monitor
+        system pasteboard (a.k.a. clipboard on non-Cocoa platforms) and decode or otherwise process URLs.
+
+        Because the Web compatibility requires that DataTransfer exposes the original URL to any document in the
+        same origin as the one which wrote the URL into the pasteboard, we store a string which uniquely identifies
+        the origin of an originating document into our custom pasteboard data. Note that we expose any URL which
+        didn't come from WebKit since we don't expect URLs to reveal privacy sensitive information. We use UUID for
+        the origin identifier of a null origin document.
+
+        An alternative approach is to store the pasteboard data from the same origin into the document and invalidate
+        it when the system pasteboard changes. However, Pasteboard object cannot know about Document (as Pasteboard
+        is a platform object and Document is a WebCore object), this turns out be quite tricky as there are multiple
+        places where we create Pasteboard objects, and they all need to be aware of this special same origin
+        Pasteboard object that hangs off of Document. Also, this approach would result in the same origin code paths
+        to diverge between null origin and non-null origin documents.
+
+        Tests: editing/pasteboard/data-transfer-get-data-on-copying-pasting-malformed-url-in-same-document.html
+               editing/pasteboard/data-transfer-set-data-ignore-copied-walformed-url-in-null-origin.html
+               editing/pasteboard/data-transfer-set-data-sanitlize-url-when-copying-in-null-origin.html
+               editing/pasteboard/data-transfer-set-data-sanitlize-url-when-dragging-in-null-origin.html
+               http/tests/security/clipboard/copy-paste-url-across-origin-sanitizes-url.html
+               CopyURL.ValidURL
+               CopyURL.UnescapedURL
+               CopyURL.MalformedURL
+               DataInteractionTests.DataTransferSetDataValidURL
+               DataInteractionTests.DataTransferSetDataUnescapedURL
+               DataInteractionTests.DataTransferSetDataInvalidURL
+
+        * dom/DataTransfer.cpp:
+        (WebCore::originForDocument): Extracted from createForCopyAndPaste.
+        (WebCore::DataTransfer::createForCopyAndPaste):
+        (WebCore::DataTransfer::getDataForItem const): Read the URL from the custom data when the originating content
+        is of the same origin. When the originating content is cross origin, or there is no custom data (e.g. written
+        by another native application; or sanitization didn't result in any difference), then callback to native value.
+        (WebCore::DataTransfer::setDataFromItemList): Sanitize the URL before writing it to the native pasteboard.
+        Store the original value if the sanitization resulted in any difference.
+        (WebCore::DataTransfer::types const):
+        (WebCore::DataTransfer::commitToPasteboard): Moved the code to write custom data to Pasteboard since we need
+        to write the origin string with it.
+        (WebCore::DataTransfer::createForDragStartEvent): Added Document as an argument to compute the origin string.
+        (WebCore::DataTransfer::createForDrop): Ditto.
+        (WebCore::DataTransfer::createForUpdatingDropTarget):
+        (WebCore::DataTransfer::moveDragState):
+        * dom/DataTransfer.h:
+        * dom/Document.cpp:
+        (WebCore::Document::uniqueIdentifier): Added. See above.
+        * dom/Document.h:
+        * editing/Editor.cpp:
+        (WebCore::createDataTransferForClipboardEvent):
+        (WebCore::dispatchClipboardEvent):
+        * page/DragController.cpp:
+        (WebCore::DragController::dispatchTextInputEventFor):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::performDragAndDrop):
+        (WebCore::EventHandler::handleDrag):
+        * platform/Pasteboard.h:
+        * platform/PasteboardStrategy.h:
+        * platform/PlatformPasteboard.h:
+        * platform/StaticPasteboard.cpp:
+        (WebCore::StaticPasteboard::takeCustomData): Moved the logic to write to native pasteboard to DataTransfer.
+        * platform/StaticPasteboard.h:
+        * platform/cocoa/PasteboardCocoa.mm:
+        (WebCore::Pasteboard::typesSafeForBindings):
+        (WebCore::Pasteboard::readStringInCustomData): Rewritten using readCustomData. See below.
+        (WebCore::Pasteboard::readOrigin): Added.
+        (WebCore::Pasteboard::readCustomData): Added. Populates the cache. Because a single Pasteboard object is never
+        allowed to read values once its content is updated by other applications, we can permanently cache the result.
+        * platform/gtk/PasteboardGtk.cpp:
+        (WebCore::Pasteboard::typesSafeForBindings): Now takes the unused origin string.
+        (WebCore::Pasteboard::readOrigin): Added.
+        * platform/gtk/PlatformPasteboardGtk.cpp:
+        (WebCore::PlatformPasteboard::typesSafeForDOMToReadAndWrite const): Now takes the unused origin string.
+        * platform/ios/PlatformPasteboardIOS.mm:
+        (WebCore::originKeyKeyForTeamData): Added.
+        (WebCore::customTypesKeyForTeamData): Added. Replaces the use of PasteboardCustomData::cocoaType() in the team
+        data for clarity since the team data key isn't same as the pasteboard type. We don't have to worry about the
+        backwards compatibility since drag & drop session doesn't persist across iOS upgrades, and there is no publicly
+        released iOS with this team data support.
+        (WebCore::PlatformPasteboard::typesSafeForDOMToReadAndWrite const): Read the origin string and the custom data
+        off the team data. Don't expose custom types that are written by cross origin documents.
+        (WebCore::PlatformPasteboard::write): Add the orign string with custom pasteboard types in the team data.
+        (WebCore::PlatformPasteboard::readURL): Fixed a bug that this function was not reading NSURL when UIPasteboard
+        serializes NSURL as a plist. This code is exercised by CopyURL.ValidURL.
+        * platform/mac/PlatformPasteboardMac.mm:
+        (WebCore::PlatformPasteboard::typesSafeForDOMToReadAndWrite const): Don't add custom pasteboard types that are
+        added by cross origin documents.
+        * platform/win/PasteboardWin.cpp:
+        (WebCore::Pasteboard::typesSafeForBindings): Now takes the unused origin string.
+        (WebCore::Pasteboard::readOrigin): Added.
+        * platform/wpe/PasteboardWPE.cpp:
+        (WebCore::Pasteboard::typesSafeForBindings): Now takes the unused origin string.
+        (WebCore::Pasteboard::readOrigin): Added.
+        * platform/wpe/PlatformPasteboardWPE.cpp:
+        (WebCore::PlatformPasteboard::typesSafeForDOMToReadAndWrite const): Now takes the unused origin string.
+
+2017-10-11  Antti Koivisto  <antti@apple.com>
+
+        Remove some obsolete layout assertions
+        https://bugs.webkit.org/show_bug.cgi?id=178170
+
+        Reviewed by Zalan Bujtas.
+
+        We have strong assertions against render tree mutation functions being called in layout. These are unnecessary.
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::moveChildTo):
+        * rendering/RenderElement.cpp:
+        (WebCore::RenderElement::takeChildInternal):
+        * rendering/RenderElement.h:
+        * rendering/RenderListItem.cpp:
+        (WebCore::RenderListItem::layout):
+        * rendering/RenderListItem.h:
+
+2017-10-11  Andy Estes  <aestes@apple.com>
+
+        [Payment Request] Implement Apple Pay merchant validation
+        https://bugs.webkit.org/show_bug.cgi?id=178159
+
+        Reviewed by Brady Eidson.
+
+        When ApplePayPaymentHandler::validateMerchant() is called, dispatch the
+        applepayvalidatemerchant event to the PaymentRequest object.
+
+        The event object is an ApplePayMerchantValidationEvent, on which the client calls complete()
+        with a merchant session.
+
+        Test: http/tests/ssl/applepay/ApplePayMerchantValidationEvent.https.html
+
+        * DerivedSources.make:
+        * Modules/applepay/ApplePayValidateMerchantEvent.h:
+        * Modules/applepay/paymentrequest/ApplePayMerchantValidationEvent.cpp: Added.
+        (WebCore::ApplePayMerchantValidationEvent::create):
+        (WebCore::ApplePayMerchantValidationEvent::ApplePayMerchantValidationEvent):
+        (WebCore::ApplePayMerchantValidationEvent::complete):
+        (WebCore::ApplePayMerchantValidationEvent::eventInterface const):
+        * Modules/applepay/paymentrequest/ApplePayMerchantValidationEvent.h: Added.
+        * Modules/applepay/paymentrequest/ApplePayMerchantValidationEvent.idl: Added.
+        * Modules/applepay/paymentrequest/ApplePayPaymentHandler.cpp:
+        (WebCore::ApplePayPaymentHandler::validateMerchant):
+        * Modules/applepay/paymentrequest/ApplePayPaymentHandler.h:
+        * Modules/paymentrequest/PaymentRequest.idl:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/EventNames.h:
+        * dom/EventNames.in:
+        * testing/Internals.cpp:
+        (WebCore::Internals::Internals):
+        * testing/MockPaymentCoordinator.cpp:
+        (WebCore::MockPaymentCoordinator::MockPaymentCoordinator):
+        (WebCore::MockPaymentCoordinator::showPaymentUI):
+        * testing/MockPaymentCoordinator.h:
+
+2017-10-11  Chris Dumez  <cdumez@apple.com>
+
+        Modernize Geolocation code
+        https://bugs.webkit.org/show_bug.cgi?id=178148
+
+        Reviewed by Ryosuke Niwa.
+
+        Modernize Geolocation code:
+        - Use std::optional<> instead of separate boolean members
+        - Make GeolocationPosition a simple struct that can be passed via IPC
+        - Replace WebGeolocationPosition::Data with GeolocationPosition
+        - Move logic to construct a GeolocationPosition from a CLLocation on iOS
+          in one place to avoid code duplication.
+
+        * Modules/geolocation/Coordinates.cpp:
+        (WebCore::Coordinates::Coordinates):
+        * Modules/geolocation/Coordinates.h:
+        (WebCore::Coordinates::create):
+        (WebCore::Coordinates::isolatedCopy const):
+        (WebCore::Coordinates::latitude const):
+        (WebCore::Coordinates::longitude const):
+        (WebCore::Coordinates::altitude const):
+        (WebCore::Coordinates::accuracy const):
+        (WebCore::Coordinates::altitudeAccuracy const):
+        (WebCore::Coordinates::heading const):
+        (WebCore::Coordinates::speed const):
+        * Modules/geolocation/Geolocation.cpp:
+        (WebCore::createGeoposition):
+        (WebCore::Geolocation::lastPosition):
+        * Modules/geolocation/GeolocationClient.h:
+        * Modules/geolocation/GeolocationController.cpp:
+        (WebCore::GeolocationController::positionChanged):
+        (WebCore::GeolocationController::lastPosition):
+        * Modules/geolocation/GeolocationController.h:
+        * Modules/geolocation/GeolocationPosition.h:
+        (WebCore::GeolocationPosition::GeolocationPosition):
+        The default constructor is only needed by our IPC decoding code.
+
+        (WebCore::GeolocationPosition::encode const):
+        (WebCore::GeolocationPosition::decode):
+        * Modules/geolocation/ios/GeolocationPositionIOS.mm: Copied from Source/WebCore/Modules/geolocation/Coordinates.cpp.
+        (WebCore::GeolocationPosition::GeolocationPosition):
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/mock/GeolocationClientMock.cpp:
+        (WebCore::GeolocationClientMock::lastPosition):
+        (WebCore::GeolocationClientMock::controllerTimerFired):
+        * platform/mock/GeolocationClientMock.h:
+
+2017-10-11  Brady Eidson  <beidson@apple.com>
+
+        Add a SW context process (where SW scripts will actually execute).
+        https://bugs.webkit.org/show_bug.cgi?id=178156
+        
+        Reviewed by Andy Estes.
+
+        No new tests (Covered by changes to existing tests).
+
+        This patch adds an auxiliary "ServiceWorker context" WebProcess to a WebProcessPool.
+
+        This process is where ServiceWorker scripts will execute, separate from the client WebProcess
+        hosting the page(s) they are serving.
+
+        This patch also adds all of the plumbing to pass along a fetched service worker script to this
+        context WebProcess, as well as message back failure to actually start the script so we can test.
+
+        Touches lots of code sites but is basically just a lot of plumbing.
+
+        * WebCore.xcodeproj/project.pbxproj:
+
+        * workers/service/ServiceWorkerContextData.h: Copied from Source/WebCore/workers/service/server/SWServerWorker.h.
+        (WebCore::ServiceWorkerContextData::encode const):
+        (WebCore::ServiceWorkerContextData::decode):
+
+        * workers/service/server/SWServer.cpp:
+        (WebCore::SWServer::Connection::finishFetchingScriptInServer):
+        (WebCore::SWServer::Connection::scriptContextFailedToStart):
+        (WebCore::SWServer::scriptFetchFinished):
+        (WebCore::SWServer::scriptContextFailedToStart):
+        (WebCore::SWServer::createWorker):
+        * workers/service/server/SWServer.h:
+
+        * workers/service/server/SWServerRegistration.cpp:
+        (WebCore::SWServerRegistration::scriptFetchFinished):
+        (WebCore::SWServerRegistration::scriptContextFailedToStart):
+        * workers/service/server/SWServerRegistration.h:
+
+        * workers/service/server/SWServerWorker.cpp:
+        (WebCore::SWServerWorker::SWServerWorker):
+        (WebCore::SWServerWorker::~SWServerWorker):
+        * workers/service/server/SWServerWorker.h:
+        (WebCore::SWServerWorker::create):
+        (WebCore::SWServerWorker::scriptURL const):
+        (WebCore::SWServerWorker::script const):
+        (WebCore::SWServerWorker::type const):
+        (WebCore::SWServerWorker::workerID const):
+
 2017-10-11  Joanmarie Diggs  <jdiggs@igalia.com>
 
         [ATK] Expose value of aria-keyshortcuts as object attribute
