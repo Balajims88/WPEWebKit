@@ -1,3 +1,304 @@
+2017-10-12  David Kilzer  <ddkilzer@apple.com>
+
+        [iOS] Fix -Wunused-lambda-capture warnings in WebCore/WebKit with new clang compiler
+        <https://webkit.org/b/178226>
+
+        Reviewed by Chris Fleizach.
+
+        * accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:
+        (-[WebAccessibilityObjectWrapper _accessibilityArticleAncestor]):
+        - Remove unused lambda variable 'self'.
+
+2017-10-12  Daniel Bates  <dabates@apple.com>
+
+        Mark more InlineBox member functions as const
+        https://bugs.webkit.org/show_bug.cgi?id=178217
+
+        Reviewed by Andy Estes.
+
+        * rendering/InlineBox.cpp:
+        (WebCore::InlineBox::locationIncludingFlipping const): Mark as const. Also fix some style
+        nits while I am here.
+        (WebCore::InlineBox::flipForWritingMode const): Mark as const.
+        (WebCore::InlineBox::locationIncludingFlipping): Deleted.
+        (WebCore::InlineBox::flipForWritingMode): Deleted.
+        * rendering/InlineBox.h:
+
+2017-10-12  Daniel Bates  <dabates@apple.com>
+
+        Teach InlineTextBox::clampOffset() about combined text and hyphenation
+        https://bugs.webkit.org/show_bug.cgi?id=178032
+
+        Reviewed by Zalan Bujtas.
+
+        Treat combined text and the last character of a word halve plus hyphen as single units.
+
+        With regards to combined text, ideally we would allow arbitrary selection inside combined
+        text. Currently we do not support selection of combined text. To simplify the process of
+        adding support for selecting combined text we treat combined text as a single unit. Once
+        we are confident that we correctly implemented such support we can re-evaluate allowing
+        arbitrary selection of combined text.
+
+        With regards to treating the last character of a word halve plus hyphen as a single unit.
+        This patch extends the targeted fix made for document markers in r223013 to all code that
+        makes use of clamped offsets as a result the selection rect for inline boxes more accurately
+        reflect the rectangle(s) that make up the painted selection. This is a step towards reconciling
+        the difference between the computation of the rectangle that represents an arbitrary
+        selection and the code that paints the active selection as part of <https://bugs.webkit.org/show_bug.cgi?id=138913>.
+
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::localSelectionRect const): Compute text run, including combined text
+        or hyphens due to line wrapping now that specified start and end positions are clamped with
+        respect to combined text and hyphens (computed earlier in this function). Only measure the
+        text represented by the selection if the start position > 0 or the end position is not equal
+        to the length of the run.
+        (WebCore::InlineTextBox::paint): Remove unnecessary code to fix up the selection start and
+        end positions based on the truncation offset as this is done by clampedOffset(), called by
+        selectionStartEnd().
+        (WebCore::InlineTextBox::clampedOffset const): Modified to adjust the clamped offset with
+        respect to truncation as well as treat combined text or a trailing word halve plus hyphen
+        as single units. Assert that we are not fully truncated because it does not make sense to
+        be computing the clamped offset in such a situation since nothing should be painted.
+        (WebCore::InlineTextBox::selectionStartEnd const): Modified to compute the end of an inside
+        selection using clampedOffset() to account for truncation, combined text or a hyphen. We
+        already are using clampedOffset() when computing the start and end position for all other
+        selection states.
+        (WebCore::InlineTextBox::paintSelection): Compute text run, including combined text
+        or hyphens due to line wrapping now that specified start and end positions are clamped with
+        respect to combined text and hyphens (computed earlier in this function). Remove unnecessary
+        code to adjust selection end point with respect to truncation, combined text, or an added
+        hyphen now that selectionStartEnd() takes care of this (via clampedOffset()).
+        (WebCore::InlineTextBox::paintTextSubrangeBackground): Compute text run, including combined
+        text or hyphens due to line wrapping now that specified start and end positions are clamped
+        with respect to combined text and hyphens (computed earlier in this function).
+        (WebCore::InlineTextBox::paintDocumentMarker): Compute text run, including combined text now
+        that specified start and end positions are clamped with respect to combined text (computed earlier in this function).
+        Also remove unnecessary code to adjust end offset of the marker with respect to truncation
+        and length of the text run as clampedOffset() now does this for us.
+
+2017-10-11  Simon Fraser  <simon.fraser@apple.com>
+
+        Don't assert if mix-blend-mode is set to a non-separable blend mode on a composited layer
+        https://bugs.webkit.org/show_bug.cgi?id=178196
+        rdar://problem/34942337
+
+        Reviewed by Dan Bates.
+
+        Core Animation doesn't support non-separable blend modes (hue, saturation, color, luminosity)
+        on layers, but don't assert if we try to use them.
+
+        Test: compositing/filters/blend-mode-saturation.html
+
+        * platform/graphics/ca/cocoa/PlatformCAFiltersCocoa.mm:
+        (PlatformCAFilters::setBlendingFiltersOnLayer):
+
+2017-10-12  John Wilander  <wilander@apple.com>
+
+        ResourceLoadObserver::logFrameNavigation() should use redirectResponse.url()
+        https://bugs.webkit.org/show_bug.cgi?id=175257
+        <rdar://problem/33359866>
+
+        Reviewed by Brent Fulgham.
+
+        This patch was joint work between Michael Specter and John Wilander.
+
+        Tests: http/tests/resourceLoadStatistics/non-sandboxed-iframe-redirect-ip-to-localhost-to-ip.html
+               http/tests/resourceLoadStatistics/non-sandboxed-iframe-redirect-localhost-to-ip-to-localhost.html
+               http/tests/resourceLoadStatistics/non-sandboxed-nesting-iframe-with-non-sandboxed-iframe-redirect-ip-to-localhost-to-ip.html
+               http/tests/resourceLoadStatistics/non-sandboxed-nesting-iframe-with-non-sandboxed-iframe-redirect-localhost-to-ip-to-localhost.html
+               http/tests/resourceLoadStatistics/non-sandboxed-nesting-iframe-with-sandboxed-iframe-redirect-ip-to-localhost-to-ip.html
+               http/tests/resourceLoadStatistics/non-sandboxed-nesting-iframe-with-sandboxed-iframe-redirect-localhost-to-ip-to-localhost.html
+               http/tests/resourceLoadStatistics/sandboxed-iframe-redirect-ip-to-localhost-to-ip.html
+               http/tests/resourceLoadStatistics/sandboxed-iframe-redirect-localhost-to-ip-to-localhost.html
+               http/tests/resourceLoadStatistics/sandboxed-nesting-iframe-with-non-sandboxed-iframe-redirect-ip-to-localhost-to-ip.html
+               http/tests/resourceLoadStatistics/sandboxed-nesting-iframe-with-non-sandboxed-iframe-redirect-localhost-to-ip-to-localhost.html
+               http/tests/resourceLoadStatistics/sandboxed-nesting-iframe-with-sandboxed-iframe-redirect-ip-to-localhost-to-ip.html
+               http/tests/resourceLoadStatistics/sandboxed-nesting-iframe-with-sandboxed-iframe-redirect-localhost-to-ip-to-localhost.html
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::willSendRequest):
+            Now sends redirectResponse.url() to WebCore::ResourceLoadObserver::logFrameNavigation().
+        * loader/ResourceLoadObserver.cpp:
+        (WebCore::ResourceLoadObserver::logFrameNavigation):
+            Now receives the redirect response URL from WebCore::DocumentLoader().
+        (WebCore::ResourceLoadObserver::nonNullOwnerURL const):
+            New function to traverse the frame chain upward and find the first non-null URL.
+        * loader/ResourceLoadObserver.h:
+
+2017-10-12  Frederic Wang  <fwang@igalia.com>
+
+        Use less specific cast in ScrollingTree::scrollPositionChangedViaDelegatedScrolling
+        https://bugs.webkit.org/show_bug.cgi?id=178211
+
+        Reviewed by Simon Fraser.
+
+        No new tests, behavior is not changed.
+
+        ScrollingTree::scrollPositionChangedViaDelegatedScrolling is a generic function that applies
+        to scrolling nodes. Casting to more specific ScrollingTreeOverflowScrollingNodes is however
+        not necessary to implement it. This patch moves to the least specific cast necessary so that
+        this function will be usable for async scrolling of non-main frames in the future. Note that
+        the function is currently only called from ScrollingTreeScrollingNodeDelegateIOS which in
+        turn is only used by the ScrollingTreeScrollingOverflowNodeIOS class and so code behavior is
+        not changed.
+
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::scrollPositionChangedViaDelegatedScrolling): Only cast the node to
+        ScrollingTreeScrollingNode.
+
+2017-10-11  Sam Weinig  <sam@webkit.org>
+
+        Remove out-parameter variants of copyToVector
+        https://bugs.webkit.org/show_bug.cgi?id=178155
+
+        Reviewed by Tim Horton.
+
+        * Modules/geolocation/Geolocation.cpp:
+        (WebCore::Geolocation::stopTimersForOneShots):
+        (WebCore::Geolocation::cancelAllRequests):
+        (WebCore::Geolocation::handleError):
+        (WebCore::Geolocation::makeSuccessCallbacks):
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::transaction):
+        * Modules/indexeddb/IDBGetAllResult.cpp:
+        (WebCore::IDBGetAllResult::allBlobFilePaths const):
+        * Modules/indexeddb/server/MemoryIndex.cpp:
+        (WebCore::IDBServer::MemoryIndex::notifyCursorsOfValueChange):
+        (WebCore::IDBServer::MemoryIndex::notifyCursorsOfAllRecordsChanged):
+        * css/CSSFontSelector.cpp:
+        (WebCore::CSSFontSelector::dispatchInvalidationCallbacks):
+        * dom/Document.cpp:
+        (WebCore::Document::moveNodeIteratorsToNewDocument):
+        (WebCore::Document::resume):
+        (WebCore::Document::didAssociateFormControlsTimerFired):
+        * dom/IdTargetObserverRegistry.cpp:
+        (WebCore::IdTargetObserverRegistry::notifyObserversInternal):
+        * dom/MutationObserver.cpp:
+        (WebCore::MutationObserver::notifyMutationObservers):
+        * dom/Node.cpp:
+        (WebCore::Document::invalidateNodeListAndCollectionCaches):
+        * dom/RadioButtonGroups.cpp:
+        * dom/ScriptExecutionContext.cpp:
+        (WebCore::ScriptExecutionContext::dispatchMessagePortEvents):
+        (WebCore::ScriptExecutionContext::stopActiveDOMObjects):
+        * loader/appcache/ApplicationCacheGroup.cpp:
+        (WebCore::ApplicationCacheGroup::checkIfLoadIsComplete):
+        (WebCore::ApplicationCacheGroup::deliverDelayedMainResources):
+        * loader/cache/MemoryCache.cpp:
+        (WebCore::MemoryCache::forEachResource):
+        (WebCore::MemoryCache::pruneDeadResourcesToSize):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::willDestroyCachedFrame):
+        (WebCore::DOMWindow::willDestroyDocumentInFrame):
+        (WebCore::DOMWindow::willDetachDocumentFromFrame):
+        (WebCore::DOMWindow::disconnectDOMWindowProperties):
+        (WebCore::DOMWindow::reconnectDOMWindowProperties):
+        * page/FrameView.cpp:
+        (WebCore::collectAndProtectWidgets):
+        * page/MemoryRelease.cpp:
+        (WebCore::releaseCriticalMemory):
+        * page/Performance.cpp:
+        (WebCore::Performance::queueEntry):
+        * platform/cocoa/PasteboardCocoa.mm:
+        (WebCore::Pasteboard::typesForLegacyUnsafeBindings):
+        * platform/graphics/cocoa/FontCacheCoreText.cpp:
+        (WebCore::FontCache::systemFontFamilies):
+        * platform/ios/PlatformPasteboardIOS.mm:
+        (WebCore::PlatformPasteboard::typesSafeForDOMToReadAndWrite const):
+        * platform/ios/WebCoreMotionManager.mm:
+        (-[WebCoreMotionManager sendAccelerometerData:]):
+        (-[WebCoreMotionManager sendMotionData:withHeading:]):
+        * platform/mac/PlatformPasteboardMac.mm:
+        (WebCore::PlatformPasteboard::typesSafeForDOMToReadAndWrite const):
+        * platform/network/cocoa/WebCoreNSURLSession.mm:
+        (-[WebCoreNSURLSession invalidateAndCancel]):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::endAndCommitUpdateScrollInfoAfterLayoutTransaction):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::setLogicalWidthForTextRun):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::FlexBoxIterator::next):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::paintObject):
+
+            Replace out-parameter based copyToVector, with one that returns a Vector.
+
+2017-10-12  Yusuke Suzuki  <utatane.tea@gmail.com>
+
+        Support integrity="" on module scripts
+        https://bugs.webkit.org/show_bug.cgi?id=177959
+
+        Reviewed by Sam Weinig.
+
+        This patch extends module hooks to accept fetching parameters.
+        When starting fetching modules, WebCore creates ModuleFetchParameters.
+        And this parameters is propagated to the fetch hook. Then, fetch
+        hook can use this parameters to fetch modules.
+
+        This parameters only contains `integrity` field. This "integrity" is
+        used to perform subresource integrity check in module loader pipeline.
+        And this error is just proparaged as errors in module pipeline, which
+        is the same to the other types of errors in module pipeline.
+
+        Test: http/tests/subresource-integrity/sri-module.html
+
+        * ForwardingHeaders/runtime/JSScriptFetchParameters.h: Added.
+        * ForwardingHeaders/runtime/ScriptFetchParameters.h: Added.
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/CachedModuleScriptLoader.cpp:
+        (WebCore::CachedModuleScriptLoader::create):
+        (WebCore::CachedModuleScriptLoader::CachedModuleScriptLoader):
+        Take parameters, which includes "integrity".
+
+        * bindings/js/CachedModuleScriptLoader.h:
+        * bindings/js/JSDOMWindowBase.cpp:
+        (WebCore::JSDOMWindowBase::moduleLoaderFetch):
+        (WebCore::JSDOMWindowBase::moduleLoaderImportModule):
+        import and fetch hooks take parameters.
+
+        * bindings/js/JSDOMWindowBase.h:
+        * bindings/js/JSMainThreadExecState.h:
+        (WebCore::JSMainThreadExecState::loadModule):
+        * bindings/js/ScriptController.cpp:
+        (WebCore::ScriptController::loadModuleScriptInWorld):
+        (WebCore::ScriptController::loadModuleScript):
+        Pass parameters to the entry point of the module pipeline.
+
+        * bindings/js/ScriptController.h:
+        * bindings/js/ScriptModuleLoader.cpp:
+        (WebCore::ScriptModuleLoader::fetch):
+        If parameters are passed, we set them to CachedModuleScriptLoader.
+
+        (WebCore::ScriptModuleLoader::importModule):
+        Pass parameters to the entry point of dynamic import.
+
+        (WebCore::ScriptModuleLoader::notifyFinished):
+        If script loader has parameters, we perform subresource integrity check here.
+
+        * bindings/js/ScriptModuleLoader.h:
+        * dom/LoadableModuleScript.cpp:
+        (WebCore::LoadableModuleScript::create):
+        (WebCore::LoadableModuleScript::LoadableModuleScript):
+        (WebCore::LoadableModuleScript::load):
+        Create ModuleFetchParameters with "integrity" value.
+
+        * dom/LoadableModuleScript.h:
+        * dom/ModuleFetchParameters.h: Copied from Source/WebCore/bindings/js/CachedModuleScriptLoader.h.
+        (WebCore::ModuleFetchParameters::create):
+        (WebCore::ModuleFetchParameters::integrity const):
+        (WebCore::ModuleFetchParameters::ModuleFetchParameters):
+        * dom/ScriptElement.cpp:
+        (WebCore::ScriptElement::requestModuleScript):
+        Pass "integrity" value to the module script.
+
+2017-10-12  Tomas Popela  <tpopela@redhat.com>
+
+        Unreviewed, fix compilation warning
+
+        warning: extra tokens at end of #endif directive [-Wendif-labels]
+
+        * rendering/RenderMediaControls.h:
+
 2017-10-11  Brent Fulgham  <bfulgham@apple.com>
 
         Correct nullptr deref in selection handling.
