@@ -210,6 +210,7 @@ bool CDMFactoryOpenCDM::supportsKeySystem(const String& keySystem)
 CDMInstanceOpenCDM::CDMInstanceOpenCDM(media::OpenCdm* session, const String& keySystem)
     : m_openCdmSession(session)
     , m_keySystem(keySystem)
+    , m_sessionInfoCount(0)
 {
 }
 
@@ -290,6 +291,7 @@ void CDMInstanceOpenCDM::requestLicense(LicenseType licenseType, const AtomicStr
 void CDMInstanceOpenCDM::updateLicense(const String& sessionId, LicenseType, const SharedBuffer& response, LicenseUpdateCallback callback)
 {
     std::string responseMessage;
+    m_openCdmSession->SelectSession(sessionId.utf8().data());
     // FIXME: This is a realy awful API, why not just take a string& ?
     int haveMessage = m_openCdmSession->Update(reinterpret_cast<unsigned char*>(const_cast<char*>(response.data())), response.size(), responseMessage);
     GST_DEBUG("session id %s, calling callback %s message", sessionId.utf8().data(), haveMessage ? "with" : "without");
@@ -363,7 +365,7 @@ size_t CDMInstanceOpenCDM::checkMessageLength(std::string& message, std::string&
     if (requestType.size() && (requestType.size() == (request.size() + 1)))
         length = requestType.size() + delimiter.size();
     else
-       length = request.length();
+        length = request.length();
     GST_TRACE("delimiter.size = %u, delimiter = %s, requestType.size = %u, requestType = %s, request.size = %u, request = %s", delimiter.size(), delimiter.c_str(), requestType.size(), requestType.c_str(), request.size(), request.c_str());
     return length;
 }
@@ -441,6 +443,25 @@ String CDMInstanceOpenCDM::getCurrentSessionId() const
         GST_WARNING("more than one session");
 
     return sessionIdMap.begin()->key;
+}
+
+bool CDMInstanceOpenCDM::getCurrentSessionInfo(String& sessionId, uint8_t*& initData) const
+{
+    if (sessionIdMap.isEmpty()) {
+        GST_WARNING("no sessions");
+        return false;
+    }
+    if (m_sessionInfoCount > sessionIdMap.size()) {
+        GST_WARNING("Invalid SessionInfo count");
+        return false;
+    }
+
+    auto iterator = sessionIdMap.begin();
+    for (int count = 0; count < m_sessionInfoCount; count++, ++iterator) { }
+    sessionId = iterator->key;
+    initData = (uint8_t*)sessionIdMap.get(sessionId)->data();
+    m_sessionInfoCount++;
+    return true;
 }
 
 } // namespace WebCore

@@ -40,6 +40,7 @@ struct _WebKitOpenCDMDecryptPrivate {
 static void webKitMediaOpenCDMDecryptorFinalize(GObject*);
 static gboolean webKitMediaOpenCDMDecryptorHandleKeyResponse(WebKitMediaCommonEncryptionDecrypt*, GstEvent*);
 static gboolean webKitMediaOpenCDMDecryptorDecrypt(WebKitMediaCommonEncryptionDecrypt*, GstBuffer*, GstBuffer*, unsigned, GstBuffer*);
+static gchar* getContentType(GstElement*);
 
 GST_DEBUG_CATEGORY(webkit_media_opencdm_decrypt_debug_category);
 #define GST_CAT_DEFAULT webkit_media_opencdm_decrypt_debug_category
@@ -89,24 +90,32 @@ static void webKitMediaOpenCDMDecryptorFinalize(GObject* object)
 
 static gboolean webKitMediaOpenCDMDecryptorHandleKeyResponse(WebKitMediaCommonEncryptionDecrypt* self, GstEvent* event)
 {
+    bool ret = false;
     const GstStructure* structure = gst_event_get_structure(event);
     if (!gst_structure_has_name(structure, "drm-session"))
-        return false;
+        return ret;
 
     GUniqueOutPtr<char> temporarySession;
-    gst_structure_get(structure, "session", G_TYPE_STRING, &temporarySession.outPtr(), nullptr);
+    GUniqueOutPtr<char> tempContentType;
+    gst_structure_get(structure, "session", G_TYPE_STRING, &temporarySession.outPtr(),
+        "contentType", G_TYPE_STRING, &tempContentType.outPtr(), nullptr);
     WebKitOpenCDMDecryptPrivate* priv = GST_WEBKIT_OPENCDM_DECRYPT_GET_PRIVATE(WEBKIT_OPENCDM_DECRYPT(self));
     ASSERT(temporarySession);
+    ASSERT(tempContentType);
 
-    if (priv->m_session != temporarySession.get() ) {
-        priv->m_session = temporarySession.get();
-        priv->m_openCdm = std::make_unique<media::OpenCdm>();
-        priv->m_openCdm->SelectSession(priv->m_session.utf8().data());
-        GST_DEBUG_OBJECT(self, "selected session %s", priv->m_session.utf8().data());
+    if (priv->m_session != temporarySession.get()) {
+        /* Comparing decrypt plugin contentType with initiator contentType */
+        if (!(g_ascii_strncasecmp(getContentType(GST_ELEMENT(self)), tempContentType.get(), CONTENT_TYPE_SIZE))) {
+            priv->m_session = temporarySession.get();
+            priv->m_openCdm = std::make_unique<media::OpenCdm>();
+            priv->m_openCdm->SelectSession(priv->m_session.utf8().data());
+            GST_DEBUG_OBJECT(self, "selected session %s", priv->m_session.utf8().data());
+            ret = true;
+        }
     } else
         GST_DEBUG_OBJECT(self, "session %s already selected!", priv->m_session.utf8().data());
 
-    return true;
+    return ret;
 }
 
 static gboolean webKitMediaOpenCDMDecryptorDecrypt(WebKitMediaCommonEncryptionDecrypt* self, GstBuffer* ivBuffer, GstBuffer* buffer, unsigned subSampleCount, GstBuffer* subSamplesBuffer)
@@ -199,6 +208,22 @@ beach:
     gst_buffer_unmap(buffer, &map);
     gst_buffer_unmap(ivBuffer, &ivMap);
     return returnValue;
+}
+
+static gchar* getContentType(GstElement* element)
+{
+    gchar* contentType = nullptr;
+
+    GstPad* sinkPad = gst_element_get_static_pad(element, "sink");
+    GstCaps* elementCaps = gst_pad_get_current_caps(sinkPad);
+    GstStructure* structure = gst_caps_get_structure(elementCaps, 0);
+    if (gst_structure_has_field_typed(structure, "original-media-type", G_TYPE_STRING))
+        contentType = (gchar*)gst_structure_get_string(structure, "original-media-type");
+
+    gst_caps_unref(elementCaps);
+    gst_object_unref(sinkPad);
+
+    return contentType;
 }
 
 #endif // ENABLE(ENCRYPTED_MEDIA) && USE(GSTREAMER) && USE(OPENCDM)

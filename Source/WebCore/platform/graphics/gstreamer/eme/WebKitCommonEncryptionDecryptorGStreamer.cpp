@@ -45,6 +45,7 @@ static gboolean webkitMediaCommonEncryptionDecryptSinkEventHandler(GstBaseTransf
 
 static gboolean webKitMediaCommonEncryptionDecryptDefaultSetupCipher(WebKitMediaCommonEncryptionDecrypt*, GstBuffer*);
 static void webKitMediaCommonEncryptionDecryptDefaultReleaseCipher(WebKitMediaCommonEncryptionDecrypt*);
+static gchar* getContentType(GstElement*);
 
 GST_DEBUG_CATEGORY_STATIC(webkit_media_common_encryption_decrypt_debug_category);
 #define GST_CAT_DEFAULT webkit_media_common_encryption_decrypt_debug_category
@@ -305,7 +306,8 @@ static gboolean webkitMediaCommonEncryptionDecryptSinkEventHandler(GstBaseTransf
             GST_DEBUG_OBJECT(self, "sending protection event to the pipeline");
             gst_element_post_message(GST_ELEMENT(self),
                 gst_message_new_element(GST_OBJECT(self),
-                    gst_structure_new("drm-key-needed", "event", GST_TYPE_EVENT, event, nullptr)));
+                    gst_structure_new("drm-key-needed", "event", GST_TYPE_EVENT, event,
+                        "contentType", G_TYPE_STRING, getContentType(GST_ELEMENT(self)), nullptr)));
         }
 
         gst_event_unref(event);
@@ -363,4 +365,19 @@ static void webKitMediaCommonEncryptionDecryptDefaultReleaseCipher(WebKitMediaCo
 {
 }
 
+static gchar* getContentType(GstElement* element)
+{
+    gchar* contentType = nullptr;
+
+    GstPad* sinkPad = gst_element_get_static_pad(element, "sink");
+    GstCaps* elementCaps = gst_pad_get_current_caps(sinkPad);
+    GstStructure* structure = gst_caps_get_structure(elementCaps, 0);
+    if (gst_structure_has_field_typed(structure, "original-media-type", G_TYPE_STRING))
+        contentType = (gchar*)gst_structure_get_string(structure, "original-media-type");
+
+    gst_caps_unref(elementCaps);
+    gst_object_unref(sinkPad);
+
+    return contentType;
+}
 #endif // ENABLE(ENCRYPTED_MEDIA) && USE(GSTREAMER)

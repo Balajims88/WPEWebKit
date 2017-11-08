@@ -50,7 +50,6 @@
 #if ENABLE(ENCRYPTED_MEDIA)
 #include "CDMInstance.h"
 #include "GStreamerEMEUtilities.h"
-#include "SharedBuffer.h"
 #include "WebKitClearKeyDecryptorGStreamer.h"
 #if USE(OPENCDM)
 #include "CDMOpenCDM.h"
@@ -260,7 +259,8 @@ private:
 #endif // USE(GSTREAMER_GL)
 
 MediaPlayerPrivateGStreamerBase::MediaPlayerPrivateGStreamerBase(MediaPlayer* player)
-    : m_notifier(MainThreadNotifier<MainThreadNotification>::create())
+    : m_decryptorCount(0)
+    , m_notifier(MainThreadNotifier<MainThreadNotification>::create())
     , m_player(player)
     , m_fpsSink(nullptr)
     , m_readyState(MediaPlayer::HaveNothing)
@@ -430,6 +430,23 @@ bool MediaPlayerPrivateGStreamerBase::handleSyncMessage(GstMessage* message)
                 GST_WARNING("cannot map %s protection data", eventKeySystemId);
                 break;
             }
+#if USE(OPENCDM)
+            /* Getting source (qtdemux) content type and initData */
+            String contentType = getContentType(GST_MESSAGE_SRC(message));
+            uint8_t* initData = (uint8_t*)malloc(mapInfo.size);
+            memcpy(initData, reinterpret_cast<uint8_t*>(mapInfo.data), mapInfo.size);
+
+            /* Compare previously saved initData with received initData */
+            uint8_t initDataIt = 0;
+            if (checkInitData(initData, initDataIt)) {
+                m_initDataInfo[initDataIt].contentType.append(contentType);
+                m_handledProtectionEvents.add(GST_EVENT_SEQNUM(event.get()));
+                GST_TRACE("m_handledProtectionEvents count %x", GST_EVENT_SEQNUM(event.get()));
+                return false;
+            }
+            /* Creating initData and content type map */
+            createInitDataMap(initData, mapInfo.size, contentType);
+#endif
             GST_TRACE("appending init data for %s of size %" G_GSIZE_FORMAT, eventKeySystemId, mapInfo.size);
             GST_MEMDUMP("init data", reinterpret_cast<const unsigned char *>(mapInfo.data), mapInfo.size);
             concatenatedInitDataChunks.append(mapInfo.data, mapInfo.size);
@@ -978,7 +995,7 @@ void MediaPlayerPrivateGStreamerBase::updateVideoRectangle()
 
     GST_INFO("Setting video sink size and position to x:%d y:%d, width=%d, height=%d", m_position.x(), m_position.y(), m_size.width(), m_size.height());
 
-    GUniquePtr<gchar> rectString(g_strdup_printf("%d,%d,%d,%d", m_position.x(), m_position.y(), m_size.width(),m_size.height()));
+    GUniquePtr<gchar> rectString(g_strdup_printf("%d,%d,%d,%d", m_position.x(), m_position.y(), m_size.width(), m_size.height()));
     g_object_set(sinkElement.get(), "rectangle", rectString.get(), nullptr);
 }
 #endif
@@ -1146,7 +1163,7 @@ gboolean appSinkSinkQuery(GstPad* pad, GstObject* parent, GstQuery* query)
     gboolean result = FALSE;
     auto* player = static_cast<MediaPlayerPrivateGStreamerBase*>(g_object_get_data(G_OBJECT(parent), "player"));
 
-    switch (GST_QUERY_TYPE (query)) {
+    switch (GST_QUERY_TYPE(query)) {
     case GST_QUERY_DRAIN: {
         player->clearCurrentBuffer();
         result = TRUE;
@@ -1200,7 +1217,7 @@ GstElement* MediaPlayerPrivateGStreamerBase::createVideoSinkGL()
     gst_element_add_pad(videoSink, gst_ghost_pad_new("sink", pad.get()));
 
     pad = adoptGRef(gst_element_get_static_pad(appsink, "sink"));
-    gst_pad_add_probe (pad.get(), GST_PAD_PROBE_TYPE_EVENT_FLUSH,
+    gst_pad_add_probe(pad.get(), GST_PAD_PROBE_TYPE_EVENT_FLUSH,
         [] (GstPad*, GstPadProbeInfo* info,  gpointer userData) -> GstPadProbeReturn {
             if (GST_EVENT_TYPE (GST_PAD_PROBE_INFO_EVENT (info)) != GST_EVENT_FLUSH_START)
                 return GST_PAD_PROBE_OK;
@@ -1361,9 +1378,14 @@ void MediaPlayerPrivateGStreamerBase::attemptToDecryptWithLocalInstance()
     if (is<CDMInstanceOpenCDM>(*m_cdmInstance)) {
         GST_DEBUG("handling OpenCDM %s keys", m_cdmInstance->keySystem().utf8().data());
         auto& cdmInstanceOpenCDM = downcast<CDMInstanceOpenCDM>(*m_cdmInstance);
-        String sessionId = cdmInstanceOpenCDM.getCurrentSessionId();
-        ASSERT(!sessionId.isEmpty());
-        dispatchDecryptionSession(sessionId);
+        uint8_t* initData;
+        String sessionId;
+        bool ret = cdmInstanceOpenCDM.getCurrentSessionInfo(sessionId, initData);
+        if (ret) {
+            m_sessionInfoMap.add(sessionId, initData);
+            validateDecryptionSession(sessionId, initData);
+        } else
+            GST_WARNING("Not able to retrieve current session info");
     }
 #endif
 }
@@ -1376,23 +1398,87 @@ void MediaPlayerPrivateGStreamerBase::dispatchDecryptionKey(GstBuffer* buffer)
     GST_TRACE("emitted decryption cipher key on pipeline, event handled %s, need to resend credentials %s", boolForPrinting(eventHandled), boolForPrinting(m_needToResendCredentials));
 }
 
-void MediaPlayerPrivateGStreamerBase::dispatchDecryptionSession(const String& sessionId)
+void MediaPlayerPrivateGStreamerBase::dispatchDecryptionSession(const String& sessionId, const String& contentType)
 {
     bool eventHandled = gst_element_send_event(m_pipeline.get(), gst_event_new_custom(GST_EVENT_CUSTOM_DOWNSTREAM_OOB,
-        gst_structure_new("drm-session", "session", G_TYPE_STRING, sessionId.utf8().data(), nullptr)));
-    m_needToResendCredentials = m_handledProtectionEvents.size() > 0;
-    GST_TRACE("emitted decryption session %s on pipeline, event handled %s, need to resend credentials %s", sessionId.utf8().data(), boolForPrinting(eventHandled), boolForPrinting(m_needToResendCredentials));
+        gst_structure_new("drm-session", "session", G_TYPE_STRING, sessionId.utf8().data(), "contentType",
+        G_TYPE_STRING, contentType.utf8().data(), nullptr)));
+    GST_TRACE("emitted decryption session %s on pipeline, event handled %s", sessionId.utf8().data(), boolForPrinting(eventHandled));
 }
 
-void MediaPlayerPrivateGStreamerBase::handleProtectionEvent(GstEvent* event)
+#if USE(OPENCDM)
+void MediaPlayerPrivateGStreamerBase::validateDecryptionSession(const String& sessionId, const uint8_t* initData)
+{
+    uint8_t initDataIt = 0;
+
+    if (!m_decryptorCount)
+        return;
+
+    /* Compare initData to get initiator content type */
+    if (checkInitData(initData, initDataIt)) {
+        for (uint8_t contentTypeIt = 0; contentTypeIt < m_initDataInfo[initDataIt].contentType.size(); contentTypeIt++) {
+            /* Check initiator content type with all decrypt plugin content type */
+            if (m_decryptorContentType.find(m_initDataInfo[initDataIt].contentType[contentTypeIt]) > 0) {
+                /*  If content type found then send the event */
+                dispatchDecryptionSession(sessionId, m_initDataInfo[initDataIt].contentType[contentTypeIt]);
+                m_initDataInfo[initDataIt].contentType.remove(contentTypeIt);
+            }
+        }
+    }
+}
+
+String MediaPlayerPrivateGStreamerBase::getContentType(const GstObject* object)
+{
+    GstPad* sinkPad = gst_element_get_static_pad(GST_ELEMENT(object), "sink");
+    GstCaps* elementCaps = gst_pad_get_current_caps(sinkPad);
+    GstStructure* structure = gst_caps_get_structure(elementCaps, 0);
+    String contentType = (gchar*)gst_structure_get_name(structure);
+
+    gst_caps_unref(elementCaps);
+    gst_object_unref(sinkPad);
+
+    return contentType;
+}
+
+bool MediaPlayerPrivateGStreamerBase::checkInitData(const uint8_t* initData, uint8_t& index)
+{
+    bool ret = false;
+
+    for (uint8_t iterator = 0; iterator < m_initDataInfo.size(); iterator++) {
+        if (!(memcmp(initData, m_initDataInfo[iterator].initData, m_initDataInfo[iterator].initDataSize))) {
+            ret =true;
+            index = iterator;
+            break;
+        }
+    }
+    return ret;
+}
+
+void MediaPlayerPrivateGStreamerBase::createInitDataMap(uint8_t*& initData, uint8_t initDataSize, String& contentType)
+{
+    InitDataInfo initDataInfo;
+    initDataInfo.initData = initData;
+    initDataInfo.initDataSize =  initDataSize;
+    initDataInfo.contentType.append(contentType);
+    m_initDataInfo.append(initDataInfo);
+}
+#endif
+
+void MediaPlayerPrivateGStreamerBase::handleProtectionEvent(GstEvent* event, gchar* contentType)
 {
     if (m_handledProtectionEvents.contains(GST_EVENT_SEQNUM(event))) {
         GST_DEBUG("event %u already handled", GST_EVENT_SEQNUM(event));
         m_handledProtectionEvents.remove(GST_EVENT_SEQNUM(event));
-        if (m_needToResendCredentials) {
-            GST_DEBUG("resending credentials");
-            attemptToDecryptWithLocalInstance();
+#if USE(OPENCDM)
+        if (!m_sessionInfoMap.isEmpty()) {
+            /* Send GST_EVENT_CUSTOM_DOWNSTREAM_OOB event with all saved SessionId */
+            for (auto& sessionMap : m_sessionInfoMap)
+                validateDecryptionSession(sessionMap.key, sessionMap.value);
+        } else {
+            m_decryptorCount++;
+            m_decryptorContentType.append(contentType);
         }
+#endif
         return;
     }
 

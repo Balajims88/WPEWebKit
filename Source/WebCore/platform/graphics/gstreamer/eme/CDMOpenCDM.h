@@ -71,6 +71,7 @@ public:
 
     // FIXME: Session handling needs a lot of love here.
     String getCurrentSessionId() const;
+    bool getCurrentSessionInfo(String&, uint8_t*&) const;
 
 private:
     MediaKeyStatus getKeyStatus(std::string &);
@@ -80,6 +81,7 @@ private:
     media::OpenCdm* m_openCdmSession;
     HashMap<String, Ref<SharedBuffer>> sessionIdMap;
     String m_keySystem;
+    mutable uint8_t m_sessionInfoCount;
 };
 
 } // namespace WebCore

@@ -40,10 +40,25 @@
 #include "TextureMapperPlatformLayerProxyProvider.h"
 #endif
 
+#if USE(OPENCDM)
+/* Now we are only handling Audio and Video content type, so defining CONTENT_TYPE_SIZE as 5.
+   We will modify it once we have subtitle */
+#define CONTENT_TYPE_SIZE 5
+
+struct _InitDataInfo {
+    uint8_t* initData;
+    uint8_t initDataSize;
+    Vector<String> contentType;
+};
+#endif
+
 typedef struct _GstStreamVolume GstStreamVolume;
 typedef struct _GstVideoInfo GstVideoInfo;
 typedef struct _GstGLContext GstGLContext;
 typedef struct _GstGLDisplay GstGLDisplay;
+#if USE(OPENCDM)
+typedef struct _InitDataInfo InitDataInfo;
+#endif
 
 namespace WebCore {
 
@@ -128,10 +143,16 @@ public:
     void cdmInstanceAttached(const CDMInstance&) override;
     void cdmInstanceDetached(const CDMInstance&) override;
     void dispatchDecryptionKey(GstBuffer*);
-    void dispatchDecryptionSession(const String&);
-    void handleProtectionEvent(GstEvent*);
+    void dispatchDecryptionSession(const String&, const String&);
+    void handleProtectionEvent(GstEvent*, gchar*);
     void attemptToDecryptWithLocalInstance();
     void attemptToDecryptWithInstance(const CDMInstance&) override;
+#if USE(OPENCDM)
+    void validateDecryptionSession(const String&, const uint8_t*);
+    void createInitDataMap(uint8_t*&, uint8_t, String&);
+    String getContentType(const GstObject*);
+    bool checkInitData(const uint8_t*, uint8_t&);
+#endif
 #endif
 
     static bool supportsKeySystem(const String& keySystem, const String& mimeType);
@@ -148,6 +169,12 @@ public:
     GstElement* pipeline() const { return m_pipeline.get(); }
 
     virtual bool handleSyncMessage(GstMessage*);
+#if USE(OPENCDM)
+    uint8_t m_decryptorCount;
+    Vector<String> m_decryptorContentType;
+    Vector<InitDataInfo> m_initDataInfo;
+    HashMap<String, uint8_t*> m_sessionInfoMap;
+#endif
 
 protected:
     MediaPlayerPrivateGStreamerBase(MediaPlayer*);
